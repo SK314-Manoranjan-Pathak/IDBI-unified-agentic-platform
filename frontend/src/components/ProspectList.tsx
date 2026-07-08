@@ -5,9 +5,9 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 import { fetchJSON, Prospect } from "@/lib/api";
 
 const PRODUCT_COLORS: Record<string, string> = {
-  "Auto Loan": "#2563eb",
-  "Home Loan": "#16a34a",
-  "Personal Loan": "#7c3aed",
+  "Auto Loan": "#3b82f6",
+  "Home Loan": "#10b981",
+  "Personal Loan": "#a855f7",
 };
 
 export default function ProspectList() {
@@ -20,7 +20,6 @@ export default function ProspectList() {
     );
   }, [threshold]);
 
-  // Product mix
   const productMix = prospects.reduce((acc, p) => {
     const prod = p.predicted_product || "Other";
     acc[prod] = (acc[prod] || 0) + 1;
@@ -30,24 +29,26 @@ export default function ProspectList() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2">🎯 Prospect Identification (PS2)</h2>
-      <p className="text-gray-500 text-sm mb-6">High-propensity customers with low default risk — ready for outreach.</p>
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold gradient-text mb-1">Prospect Assist — PS2</h2>
+        <p className="text-sm text-[var(--text-muted)]">High-propensity customers with low default risk — ready for outreach</p>
+      </div>
 
-      <div className="flex items-center gap-4 mb-6">
-        <label className="text-sm">Propensity Threshold:</label>
+      <div className="flex items-center gap-4 mb-6 card py-4">
+        <label className="text-sm text-[var(--text-secondary)]">Propensity Threshold:</label>
         <input
           type="range" min={50} max={99} value={threshold}
           onChange={(e) => setThreshold(Number(e.target.value))}
           className="w-48"
         />
-        <span className="font-semibold">{threshold}%</span>
-        <span className="ml-4 text-sm text-gray-500">({prospects.length} qualified)</span>
+        <span className="font-semibold text-[var(--primary-light)]">{threshold}%</span>
+        <span className="ml-4 text-sm text-[var(--text-muted)]">({prospects.length} qualified)</span>
       </div>
 
       <div className="grid grid-cols-3 gap-6 mb-6">
         <div className="col-span-2 card overflow-auto max-h-[500px]">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 sticky top-0">
+            <thead className="sticky top-0">
               <tr>
                 <th className="text-left p-2">Account</th>
                 <th className="text-left p-2">Score</th>
@@ -58,18 +59,18 @@ export default function ProspectList() {
             </thead>
             <tbody>
               {prospects.map((p) => (
-                <tr key={p.account_id} className="border-t hover:bg-blue-50">
-                  <td className="p-2 font-mono">{p.account_id}</td>
-                  <td className="p-2 font-semibold text-blue-600">{p.propensity_score}</td>
+                <tr key={p.account_id} className="border-t border-[var(--card-border)]">
+                  <td className="p-2 font-mono text-[var(--text-secondary)]">{p.account_id}</td>
+                  <td className="p-2 font-semibold text-[var(--primary-light)]">{p.propensity_score}</td>
                   <td className="p-2">
                     <span className="px-2 py-0.5 rounded text-xs font-medium"
                       style={{ background: (PRODUCT_COLORS[p.predicted_product] || "#666") + "20",
-                               color: PRODUCT_COLORS[p.predicted_product] || "#666" }}>
+                               color: PRODUCT_COLORS[p.predicted_product] || "#94a3b8" }}>
                       {p.predicted_product}
                     </span>
                   </td>
-                  <td className="p-2 text-green-600">{p.default_probability}%</td>
-                  <td className="p-2">₹{p.monthly_surplus.toLocaleString()}</td>
+                  <td className="p-2 text-[var(--green)]">{p.default_probability}%</td>
+                  <td className="p-2 text-[var(--text-secondary)]">₹{p.monthly_surplus.toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -77,15 +78,15 @@ export default function ProspectList() {
         </div>
 
         <div className="card">
-          <h3 className="font-semibold mb-4">Product Mix</h3>
+          <h3 className="font-semibold text-[var(--text)] mb-4">Product Mix</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={mixData}>
-              <XAxis dataKey="name" fontSize={11} />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="count" name="Count">
+              <XAxis dataKey="name" fontSize={11} stroke="#94a3b8" />
+              <YAxis stroke="#94a3b8" />
+              <Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "8px", color: "#1e293b" }} />
+              <Bar dataKey="count" name="Count" radius={[4, 4, 0, 0]}>
                 {mixData.map((d, i) => (
-                  <Cell key={i} fill={PRODUCT_COLORS[d.name] || "#666"} />
+                  <Cell key={i} fill={PRODUCT_COLORS[d.name] || "#64748b"} />
                 ))}
               </Bar>
             </BarChart>
