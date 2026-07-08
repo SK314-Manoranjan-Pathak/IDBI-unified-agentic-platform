@@ -1,0 +1,2 @@
+# Processed pipeline outputs are written here (indianized_transactions.csv,
+# customer_profiles.csv, feature_matrix.csv). This file keeps the folder in git.

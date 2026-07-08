@@ -1,0 +1,28 @@
+# IDBI Unified Agentic Platform — ML Pipeline (Layers 2 & 3)
+# Pinned to versions verified as installed and working on Python 3.14.
+
+# --- Data wrangling ---
+pandas==2.3.3
+numpy==2.3.5
+
+# --- ML ---
+scikit-learn==1.7.2
+xgboost==3.1.2
+lightgbm==4.6.0
+
+# --- Explainability ---
+shap==0.50.0
+matplotlib==3.10.7
+
+# --- Model persistence ---
+joblib==1.5.2
+
+# --- Scoring API ---
+fastapi==0.109.0
+uvicorn==0.41.0
+python-multipart==0.0.22
+
+# --- Notes ---
+# huggingface_hub was upgraded to 1.22.0 during dataset download, which conflicts
+# with transformers<1.0. Only relevant if a Transaction Transformer is added later;
+# if so, pin huggingface_hub<1.0. Not required for the XGBoost/LightGBM pipeline.
