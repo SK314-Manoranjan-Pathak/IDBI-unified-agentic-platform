@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { fetchJSON, CustomerSummary, Prospect, EarlyWarningAccount } from "@/lib/api";
 
-const COLORS = { green: "#16a34a", amber: "#d97706", red: "#dc2626" };
+const COLORS = { green: "#10b981", amber: "#f59e0b", red: "#f43f5e" };
 
 export default function PortfolioOverview() {
   const [customers, setCustomers] = useState<CustomerSummary[]>([]);
@@ -36,32 +36,35 @@ export default function PortfolioOverview() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">📊 Portfolio Overview</h2>
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold gradient-text mb-1">Portfolio Overview</h2>
+        <p className="text-sm text-[var(--text-muted)]">Real-time intelligence across all customer accounts</p>
+      </div>
 
       {/* KPIs */}
       <div className="grid grid-cols-4 gap-4 mb-8">
         <div className="card text-center">
-          <p className="text-3xl font-bold">{customers.length.toLocaleString()}</p>
-          <p className="text-sm text-gray-500">Total Customers</p>
+          <p className="text-3xl font-bold text-[var(--text)]">{customers.length.toLocaleString()}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-1">Total Customers</p>
         </div>
         <div className="card text-center">
-          <p className="text-3xl font-bold text-green-600">{green.toLocaleString()}</p>
-          <p className="text-sm text-gray-500">🟢 Low Risk</p>
+          <p className="text-3xl font-bold text-[var(--green)]">{green.toLocaleString()}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-1">Low Risk</p>
         </div>
         <div className="card text-center">
-          <p className="text-3xl font-bold text-red-600">{red.toLocaleString()}</p>
-          <p className="text-sm text-gray-500">🔴 High Risk</p>
+          <p className="text-3xl font-bold text-[var(--red)]">{red.toLocaleString()}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-1">High Risk</p>
         </div>
         <div className="card text-center">
-          <p className="text-3xl font-bold text-blue-600">{hotProspects}</p>
-          <p className="text-sm text-gray-500">🎯 Hot Prospects</p>
+          <p className="text-3xl font-bold text-[var(--primary-blue)]">{hotProspects}</p>
+          <p className="text-xs text-[var(--text-muted)] mt-1">Hot Prospects</p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-6 mb-8">
         {/* Pie chart */}
         <div className="card">
-          <h3 className="font-semibold mb-4">Risk Distribution</h3>
+          <h3 className="font-semibold text-[var(--text)] mb-4">Risk Distribution</h3>
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
@@ -69,20 +72,20 @@ export default function PortfolioOverview() {
                   <Cell key={i} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "8px", color: "#1e293b" }} />
             </PieChart>
           </ResponsiveContainer>
         </div>
 
         {/* Top prospects bar */}
         <div className="card">
-          <h3 className="font-semibold mb-4">Top 15 Prospects</h3>
+          <h3 className="font-semibold text-[var(--text)] mb-4">Top 15 Prospects</h3>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={prospects} layout="vertical">
-              <XAxis type="number" domain={[0, 100]} />
-              <YAxis type="category" dataKey="account_id" width={60} fontSize={11} />
-              <Tooltip />
-              <Bar dataKey="propensity_score" fill="#2563eb" name="Propensity" />
+              <XAxis type="number" domain={[0, 100]} stroke="#64748b" fontSize={11} />
+              <YAxis type="category" dataKey="account_id" width={60} fontSize={11} stroke="#64748b" />
+              <Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "8px", color: "#1e293b" }} />
+              <Bar dataKey="propensity_score" fill="#3b82f6" name="Propensity" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -90,9 +93,9 @@ export default function PortfolioOverview() {
 
       {/* Early warning table */}
       <div className="card">
-        <h3 className="font-semibold mb-4">⚠️ Early Warning (PD &gt; 30%)</h3>
+        <h3 className="font-semibold text-[var(--text)] mb-4">Early Warning — Accounts with PD &gt; 30%</h3>
         <table className="w-full text-sm">
-          <thead className="bg-gray-50">
+          <thead>
             <tr>
               <th className="text-left p-2">Account</th>
               <th className="text-left p-2">PD %</th>
@@ -102,11 +105,15 @@ export default function PortfolioOverview() {
           </thead>
           <tbody>
             {warnings.map((w) => (
-              <tr key={w.account_id} className="border-t">
-                <td className="p-2 font-mono">{w.account_id}</td>
-                <td className="p-2 text-red-600 font-semibold">{w.default_probability_pct}%</td>
-                <td className="p-2">{w.loan_status}</td>
-                <td className="p-2">{w.top_stress_factors[0]?.feature}</td>
+              <tr key={w.account_id} className="border-t border-[var(--card-border)]">
+                <td className="p-2 font-mono text-[var(--text-secondary)]">{w.account_id}</td>
+                <td className="p-2 text-[var(--red)] font-semibold">{w.default_probability_pct}%</td>
+                <td className="p-2">
+                  <span className="px-2 py-0.5 rounded text-xs font-medium bg-[var(--red)]/10 text-[var(--red)]">
+                    {w.loan_status}
+                  </span>
+                </td>
+                <td className="p-2 text-[var(--text-muted)] text-xs">{w.top_stress_factors[0]?.feature.replace(/_/g, " ")}</td>
               </tr>
             ))}
           </tbody>

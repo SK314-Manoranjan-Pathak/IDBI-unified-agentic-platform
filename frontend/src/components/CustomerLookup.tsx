@@ -36,7 +36,10 @@ export default function CustomerLookup() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">🔍 Customer Lookup</h2>
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold gradient-text mb-1">Customer Intelligence</h2>
+        <p className="text-sm text-[var(--text-muted)]">360° view — propensity, health, and risk for any customer</p>
+      </div>
 
       <div className="flex gap-3 mb-6">
         <input
@@ -44,10 +47,10 @@ export default function CustomerLookup() {
           placeholder="Enter Account ID (e.g. 2048)"
           value={accountId}
           onChange={(e) => setAccountId(e.target.value)}
-          className="border rounded px-4 py-2 w-64"
+          className="w-64"
           onKeyDown={(e) => e.key === "Enter" && lookup()}
         />
-        <button onClick={lookup} className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+        <button onClick={lookup} className="bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-[var(--text)] px-6 py-2 rounded-lg font-medium hover:opacity-90 hover:shadow-lg hover:shadow-blue-500/20">
           Search
         </button>
       </div>
@@ -56,55 +59,67 @@ export default function CustomerLookup() {
         <>
           {/* Profile metrics */}
           <div className="grid grid-cols-4 gap-4 mb-6">
-            <div className="card"><p className="text-xs text-gray-500">Income/mo</p><p className="text-xl font-bold">₹{customer.monthly_income_avg?.toLocaleString()}</p></div>
-            <div className="card"><p className="text-xs text-gray-500">Surplus/mo</p><p className="text-xl font-bold">₹{customer.monthly_surplus_avg?.toLocaleString()}</p></div>
-            <div className="card"><p className="text-xs text-gray-500">Balance</p><p className="text-xl font-bold">₹{customer.balance_latest?.toLocaleString()}</p></div>
-            <div className="card"><p className="text-xs text-gray-500">Has Loan</p><p className="text-xl font-bold">{customer.has_loan ? "Yes" : "No"}</p></div>
+            <div className="card">
+              <p className="text-xs text-[var(--text-muted)]">Income/mo</p>
+              <p className="text-xl font-bold text-[var(--text)]">₹{customer.monthly_income_avg?.toLocaleString()}</p>
+            </div>
+            <div className="card">
+              <p className="text-xs text-[var(--text-muted)]">Surplus/mo</p>
+              <p className="text-xl font-bold text-[var(--text)]">₹{customer.monthly_surplus_avg?.toLocaleString()}</p>
+            </div>
+            <div className="card">
+              <p className="text-xs text-[var(--text-muted)]">Balance</p>
+              <p className="text-xl font-bold text-[var(--text)]">₹{customer.balance_latest?.toLocaleString()}</p>
+            </div>
+            <div className="card">
+              <p className="text-xs text-[var(--text-muted)]">Has Loan</p>
+              <p className="text-xl font-bold text-[var(--text)]">{customer.has_loan ? "Yes" : "No"}</p>
+            </div>
           </div>
 
-          {/* Score gauges (simple colored cards) */}
+          {/* Score cards */}
           <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="card border-l-4 border-blue-500">
-              <p className="text-xs text-gray-500">Propensity Score</p>
-              <p className="text-3xl font-bold text-blue-600">{customer.propensity_score}</p>
-              <p className="text-xs">{propensity?.predicted_product} · {propensity?.confidence}</p>
+            <div className="card border-l-4 border-[var(--primary)]">
+              <p className="text-xs text-[var(--text-muted)]">Propensity Score</p>
+              <p className="text-3xl font-bold text-[var(--primary-light)]">{customer.propensity_score}</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">{propensity?.predicted_product} · {propensity?.confidence}</p>
             </div>
-            <div className={`card border-l-4 ${customer.default_probability > 30 ? "border-red-500" : customer.default_probability > 10 ? "border-amber-500" : "border-green-500"}`}>
-              <p className="text-xs text-gray-500">Default Risk</p>
-              <p className={`text-3xl font-bold ${customer.default_probability > 30 ? "text-red-600" : "text-green-600"}`}>{customer.default_probability}%</p>
-              <p className="text-xs">{defaultRisk?.stress_level}</p>
+            <div className={`card border-l-4 ${customer.default_probability > 30 ? "border-[var(--red)]" : customer.default_probability > 10 ? "border-[var(--amber)]" : "border-[var(--green)]"}`}>
+              <p className="text-xs text-[var(--text-muted)]">Default Risk</p>
+              <p className={`text-3xl font-bold ${customer.default_probability > 30 ? "text-[var(--red)]" : "text-[var(--green)]"}`}>{customer.default_probability}%</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">{defaultRisk?.stress_level}</p>
             </div>
-            <div className="card border-l-4 border-emerald-500">
-              <p className="text-xs text-gray-500">Health Score</p>
-              <p className="text-3xl font-bold text-emerald-600">{customer.health_scores.composite}</p>
-              <p className="text-xs">Composite / 100</p>
+            <div className="card border-l-4 border-[var(--green)]">
+              <p className="text-xs text-[var(--text-muted)]">Health Score</p>
+              <p className="text-3xl font-bold text-[var(--green)]">{customer.health_scores.composite}</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">Composite / 100</p>
             </div>
           </div>
 
-          {/* Radar + SHAP side by side */}
+          {/* Radar + SHAP */}
           <div className="grid grid-cols-2 gap-6">
             <div className="card">
-              <h3 className="font-semibold mb-3">Health Card (6 Dimensions)</h3>
+              <h3 className="font-semibold text-[var(--text)] mb-3">Health Card (6 Dimensions)</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <RadarChart data={healthRadar}>
-                  <PolarGrid />
-                  <PolarAngleAxis dataKey="dim" fontSize={10} />
-                  <PolarRadiusAxis domain={[0, 100]} />
-                  <Radar dataKey="score" stroke="#2563eb" fill="#2563eb" fillOpacity={0.3} />
+                  <PolarGrid stroke="#e2e8f0" />
+                  <PolarAngleAxis dataKey="dim" fontSize={10} stroke="#94a3b8" />
+                  <PolarRadiusAxis domain={[0, 100]} stroke="#cbd5e1" />
+                  <Radar dataKey="score" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.2} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
             <div className="card">
-              <h3 className="font-semibold mb-3">SHAP — Default Risk Factors</h3>
+              <h3 className="font-semibold text-[var(--text)] mb-3">SHAP — Default Risk Factors</h3>
               {defaultRisk && (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={shapData(defaultRisk.top_factors)} layout="vertical">
-                    <XAxis type="number" />
-                    <YAxis type="category" dataKey="name" width={140} fontSize={11} />
-                    <Tooltip />
-                    <Bar dataKey="value" name="SHAP">
+                    <XAxis type="number" stroke="#94a3b8" fontSize={11} />
+                    <YAxis type="category" dataKey="name" width={140} fontSize={10} stroke="#94a3b8" />
+                    <Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "8px", color: "#1e293b" }} />
+                    <Bar dataKey="value" name="SHAP" radius={[0, 4, 4, 0]}>
                       {shapData(defaultRisk.top_factors).map((d, i) => (
-                        <Cell key={i} fill={d.value > 0 ? "#dc2626" : "#16a34a"} />
+                        <Cell key={i} fill={d.value > 0 ? "#f43f5e" : "#10b981"} />
                       ))}
                     </Bar>
                   </BarChart>
