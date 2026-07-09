@@ -165,14 +165,14 @@ Resources:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          CidrIp: 0.0.0.0/0  # CloudFront uses varying IPs; restrict via custom header below
+          CidrIp: 0.0.0.0/0
           Description: HTTP from CloudFront (validated via custom header)
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          DestinationSecurityGroupId: !Ref EC2SecurityGroup
-          Description: Forward to EC2 Nginx
+          CidrIp: 10.0.0.0/16
+          Description: Forward to EC2 Nginx (VPC internal)
       Tags:
         - Key: Name
           Value: idbi-alb-sg
