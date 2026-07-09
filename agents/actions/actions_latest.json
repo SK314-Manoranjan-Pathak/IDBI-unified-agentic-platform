@@ -1,0 +1,182 @@
+[
+  {
+    "timestamp": "2026-07-09T02:15:00Z",
+    "agent": "risk_agent",
+    "customer_id": 2048,
+    "trigger": "default_probability_spike",
+    "scores": {"default_pd": 38.1},
+    "structured_output": {
+      "customer_id": 2048,
+      "assessment": "Customer shows rapid PD deterioration from 6% to 38% over 42 days. SHAP analysis indicates salary delay and cash advances as primary drivers, consistent with a job transition pattern rather than structural income loss.",
+      "default_probability": 38.1,
+      "stress_level": "action_required",
+      "root_cause": "Job transition — salary credit delayed 12 days, FD pre-closed for liquidity, cash advances to bridge gap",
+      "top_risk_factors": ["salary_delay_days", "cash_advance_count_30d", "sip_cancelled_recently"],
+      "is_temporary": true,
+      "recommended_actions": [
+        {
+          "action_type": "alert_rm",
+          "label": "Alert RM (Urgent)",
+          "details": "Notify RM Ajay Kumar — customer likely in job transition. EMI due in 5 days, high bounce risk.",
+          "urgency": "critical"
+        },
+        {
+          "action_type": "initiate_text_outreach",
+          "label": "Send Support Message",
+          "details": "\"Need flexibility with your upcoming EMI? We're here to help. Your RM will reach out shortly.\"",
+          "urgency": "high"
+        },
+        {
+          "action_type": "recommend_moratorium",
+          "label": "Recommend 2-Month Moratorium",
+          "details": "Propose 2-month EMI pause to prevent bounce. Resume normal schedule after salary stabilizes.",
+          "urgency": "high"
+        }
+      ],
+      "autonomy_tier": 2
+    },
+    "status": "completed"
+  },
+  {
+    "timestamp": "2026-07-09T02:14:30Z",
+    "agent": "prospect_agent",
+    "customer_id": 3421,
+    "trigger": "high_propensity",
+    "scores": {"propensity": 87.3, "default_pd": 4.2},
+    "structured_output": {
+      "customer_id": 3421,
+      "assessment": "Strong auto loan prospect — 3 car dealership payments in 14 days, monthly surplus comfortably supports ₹18K EMI, very low default risk at 4.2%.",
+      "propensity_confidence": "high",
+      "intent_signals": ["auto_dealer_txn_count_30d (3 transactions)", "new_merchant_velocity high", "discretionary_spend_ratio stable"],
+      "predicted_product": "Auto Loan",
+      "recommended_amount": 1000000,
+      "estimated_emi": 18200,
+      "monthly_surplus": 42000,
+      "recommended_actions": [
+        {
+          "action_type": "generate_loan_offer",
+          "label": "Generate Pre-Approved Offer",
+          "details": "Auto Loan: ₹10,00,000 at 8.5% p.a., 60 months, EMI ₹18,200",
+          "urgency": "high"
+        },
+        {
+          "action_type": "send_push_notification",
+          "label": "Send Customer Nudge",
+          "details": "\"Looking at a new car? We have a pre-approved auto loan ready for you — ₹10L at 8.5%. Tap to explore.\"",
+          "urgency": "medium"
+        },
+        {
+          "action_type": "alert_rm",
+          "label": "Brief RM for Follow-up",
+          "details": "Add to RM Priya's call list. Follow up in 48 hours if no response to notification.",
+          "urgency": "medium"
+        }
+      ],
+      "autonomy_tier": 1
+    },
+    "status": "completed"
+  },
+  {
+    "timestamp": "2026-07-09T02:14:00Z",
+    "agent": "health_agent",
+    "customer_id": 2926,
+    "trigger": "msme_health_assessment",
+    "scores": {},
+    "structured_output": {
+      "customer_id": 2926,
+      "assessment": "Textile MSME with strong cash flow and zero bounces. Seasonal revenue dip in June-July is a manageable concern. Overall healthy profile suitable for working capital lending.",
+      "composite_score": 76.2,
+      "strengths": ["Zero bounced payments (debt management: 92)", "Strong monthly surplus of ₹90K", "GST filed on time 11/12 months", "Stable 5-employee workforce"],
+      "concerns": ["Revenue seasonal — dips 30% in June-July", "Moderate growth trajectory (65/100)", "One missed GST filing (August)"],
+      "lending_recommendation": "approve",
+      "suggested_amount": 800000,
+      "special_conditions": "Structured EMI: ₹18K normal months, ₹12K in June-July to match seasonal cash flow",
+      "recommended_actions": [
+        {
+          "action_type": "flag_for_underwriter",
+          "label": "Send to Underwriter",
+          "details": "Health Card + recommendation: Approve ₹8L with structured EMI. Composite score 76/100.",
+          "urgency": "medium"
+        },
+        {
+          "action_type": "generate_loan_offer",
+          "label": "Prepare Offer Letter",
+          "details": "Working Capital: ₹8,00,000 at 10.5% p.a., 36 months, structured EMI ₹18K/₹12K",
+          "urgency": "low"
+        }
+      ],
+      "autonomy_tier": 3
+    },
+    "status": "completed"
+  },
+  {
+    "timestamp": "2026-07-09T02:13:30Z",
+    "agent": "engagement_agent",
+    "customer_id": 4501,
+    "trigger": "high_propensity",
+    "scores": {"propensity": 78.5, "default_pd": 6.1},
+    "structured_output": {
+      "customer_id": 4501,
+      "assessment": "32-year-old professional showing home loan intent — property portal payments detected. Monthly surplus ₹65K supports significant EMI. No existing home loan.",
+      "trigger_reason": "Property search behavior detected (99acres, MagicBricks payments)",
+      "message_content": "Planning your dream home? You're pre-qualified for a home loan up to ₹45L at competitive rates. Tap to explore your options — zero processing fee this month.",
+      "message_language": "en",
+      "channel": "push",
+      "send_timing": "7:00 PM today (customer typically active evenings)",
+      "recommended_actions": [
+        {
+          "action_type": "send_push_notification",
+          "label": "Send Push Notification",
+          "details": "Personalized home loan nudge — English, push notification at 7 PM",
+          "urgency": "medium"
+        },
+        {
+          "action_type": "alert_rm",
+          "label": "Brief RM",
+          "details": "Customer exploring property. Schedule follow-up call in 3 days if no response.",
+          "urgency": "low"
+        },
+        {
+          "action_type": "schedule_followup",
+          "label": "Schedule Follow-up",
+          "details": "If no response in 72 hours, send SMS reminder with branch visit invite",
+          "urgency": "low"
+        }
+      ],
+      "autonomy_tier": 1
+    },
+    "status": "completed"
+  },
+  {
+    "timestamp": "2026-07-09T02:13:00Z",
+    "agent": "risk_agent",
+    "customer_id": 1856,
+    "trigger": "default_probability_spike",
+    "scores": {"default_pd": 52.7},
+    "structured_output": {
+      "customer_id": 1856,
+      "assessment": "Severe deterioration — PD at 52.7% with multiple EMI bounces over 6 months. This is structural income stress, not temporary. Requires immediate risk committee review.",
+      "default_probability": 52.7,
+      "stress_level": "escalate",
+      "root_cause": "Structural income loss — salary reduced, multiple bounces, balance consistently below minimum",
+      "top_risk_factors": ["emi_bounce_count_6m", "balance_below_min_count", "salary_delay_days"],
+      "is_temporary": false,
+      "recommended_actions": [
+        {
+          "action_type": "escalate_to_risk_committee",
+          "label": "Escalate to Risk Committee",
+          "details": "PD 52.7%, structural stress. Requires urgent restructuring or recall decision.",
+          "urgency": "critical"
+        },
+        {
+          "action_type": "alert_rm",
+          "label": "Alert RM (Critical)",
+          "details": "Account requires immediate restructuring discussion. 6 bounces in 6 months.",
+          "urgency": "critical"
+        }
+      ],
+      "autonomy_tier": 3
+    },
+    "status": "completed"
+  }
+]
