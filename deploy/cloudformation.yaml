@@ -1,157 +1,39 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  IDBI Unified Agentic Platform — Full stack deployment.
-  CloudFront → ALB → EC2 (private subnet) with VPC, NAT, Nginx, FastAPI, Next.js.
+  IDBI Unified Agentic Platform — Deployment using existing VPC.
+  CloudFront → ALB → EC2 with Nginx, FastAPI, Next.js.
 
 Parameters:
   KeyPairName:
     Type: AWS::EC2::KeyPair::KeyName
-    Description: EC2 Key Pair for emergency SSH access (SSM preferred)
+    Description: EC2 Key Pair for emergency SSH access
   GitRepoUrl:
     Type: String
     Default: https://github.com/SK314-Manoranjan-Pathak/IDBI-unified-agentic-platform.git
-    Description: Git repository URL to clone on EC2
   GitBranch:
     Type: String
-    Default: main
-    Description: Git branch to deploy
+    Default: ML-pipeline
   LatestAmiId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
-    Description: Latest Amazon Linux 2023 x86_64 AMI (auto-resolved)
-
   InstanceType:
     Type: String
     Default: t3.xlarge
-    Description: EC2 instance type (4 vCPU, 16 GB RAM recommended)
-    AllowedValues: [t3.large, t3.xlarge, m6i.large, m6i.xlarge, c6i.xlarge]
+    AllowedValues: [t3.large, t3.xlarge, m6i.large, m6i.xlarge]
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Default: vpc-0a9c421eff4cd5e8d
+    Description: Existing VPC ID
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet::Id
+    Default: subnet-08e95ab6b2ef7c89d
+    Description: Public subnet AZ-a (for ALB + EC2)
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet::Id
+    Default: subnet-03629ef4cfcfcaa44
+    Description: Public subnet AZ-b (for ALB)
 
 Resources:
-
-  # ========================================================================
-  # VPC & Networking
-  # ========================================================================
-  VPC:
-    Type: AWS::EC2::VPC
-    Properties:
-      CidrBlock: 10.0.0.0/16
-      EnableDnsSupport: true
-      EnableDnsHostnames: true
-      Tags:
-        - Key: Name
-          Value: idbi-platform-vpc
-
-  InternetGateway:
-    Type: AWS::EC2::InternetGateway
-    Properties:
-      Tags:
-        - Key: Name
-          Value: idbi-platform-igw
-
-  IGWAttachment:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties:
-      VpcId: !Ref VPC
-      InternetGatewayId: !Ref InternetGateway
-
-  PublicSubnetA:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      CidrBlock: 10.0.1.0/24
-      AvailabilityZone: !Select [0, !GetAZs '']
-      MapPublicIpOnLaunch: false
-      Tags:
-        - Key: Name
-          Value: idbi-public-a
-
-  PublicSubnetB:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      CidrBlock: 10.0.2.0/24
-      AvailabilityZone: !Select [1, !GetAZs '']
-      MapPublicIpOnLaunch: false
-      Tags:
-        - Key: Name
-          Value: idbi-public-b
-
-  PrivateSubnet:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref VPC
-      CidrBlock: 10.0.10.0/24
-      AvailabilityZone: !Select [0, !GetAZs '']
-      MapPublicIpOnLaunch: false
-      Tags:
-        - Key: Name
-          Value: idbi-private
-
-  # Public route table
-  PublicRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: idbi-public-rt
-
-  PublicRoute:
-    Type: AWS::EC2::Route
-    DependsOn: IGWAttachment
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
-
-  PublicSubnetARouteAssoc:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref PublicSubnetA
-      RouteTableId: !Ref PublicRouteTable
-
-  PublicSubnetBRouteAssoc:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref PublicSubnetB
-      RouteTableId: !Ref PublicRouteTable
-
-  # NAT Gateway (for EC2 outbound in private subnet)
-  NatEIP:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-
-  NatGateway:
-    Type: AWS::EC2::NatGateway
-    Properties:
-      AllocationId: !GetAtt NatEIP.AllocationId
-      SubnetId: !Ref PublicSubnetA
-      Tags:
-        - Key: Name
-          Value: idbi-nat
-
-  PrivateRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: idbi-private-rt
-
-  PrivateRoute:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway
-
-  PrivateSubnetRouteAssoc:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref PrivateSubnet
-      RouteTableId: !Ref PrivateRouteTable
-
 
   # ========================================================================
   # Security Groups
@@ -159,20 +41,13 @@ Resources:
   ALBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: ALB - allow HTTP from CloudFront only
-      VpcId: !Ref VPC
+      GroupDescription: ALB - allow HTTP from anywhere (CloudFront)
+      VpcId: !Ref VpcId
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-          Description: HTTP from CloudFront (validated via custom header)
-      SecurityGroupEgress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 10.0.0.0/16
-          Description: Forward to EC2 Nginx (VPC internal)
       Tags:
         - Key: Name
           Value: idbi-alb-sg
@@ -180,31 +55,22 @@ Resources:
   EC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: EC2 - allow traffic only from ALB
-      VpcId: !Ref VPC
+      GroupDescription: EC2 - allow port 80 from ALB only
+      VpcId: !Ref VpcId
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
           SourceSecurityGroupId: !Ref ALBSecurityGroup
-          Description: Nginx from ALB only
       SecurityGroupEgress:
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
+        - IpProtocol: "-1"
           CidrIp: 0.0.0.0/0
-          Description: HTTPS outbound (pip, npm, git, OS updates)
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-          Description: HTTP outbound (package downloads)
       Tags:
         - Key: Name
           Value: idbi-ec2-sg
 
   # ========================================================================
-  # IAM Role for EC2 (SSM + S3 access for data upload)
+  # IAM Role (SSM + S3 + Bedrock)
   # ========================================================================
   EC2Role:
     Type: AWS::IAM::Role
@@ -220,9 +86,6 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
         - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
         - arn:aws:iam::aws:policy/AmazonBedrockFullAccess
-      Tags:
-        - Key: Name
-          Value: idbi-ec2-role
 
   EC2InstanceProfile:
     Type: AWS::IAM::InstanceProfile
@@ -231,7 +94,7 @@ Resources:
         - !Ref EC2Role
 
   # ========================================================================
-  # S3 Bucket (for model artifact upload)
+  # S3 Bucket (model artifacts)
   # ========================================================================
   DataBucket:
     Type: AWS::S3::Bucket
@@ -241,22 +104,17 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-      Tags:
-        - Key: Name
-          Value: idbi-data-bucket
-
 
   # ========================================================================
-  # EC2 Instance
+  # EC2 Instance (public subnet, SG blocks direct access)
   # ========================================================================
   EC2Instance:
     Type: AWS::EC2::Instance
-    DependsOn: PrivateRoute
     Properties:
       InstanceType: !Ref InstanceType
       ImageId: !Ref LatestAmiId
       KeyName: !Ref KeyPairName
-      SubnetId: !Ref PrivateSubnet
+      SubnetId: !Ref PublicSubnetA
       SecurityGroupIds:
         - !Ref EC2SecurityGroup
       IamInstanceProfile: !Ref EC2InstanceProfile
@@ -274,60 +132,46 @@ Resources:
           set -ex
           exec > /var/log/user-data.log 2>&1
 
-          # --- System packages ---
           dnf update -y
           dnf install -y git nginx python3.12 python3.12-pip python3.12-devel gcc
 
-          # --- Node.js 20 LTS ---
           curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
           dnf install -y nodejs
           npm install -g pm2
 
-          # --- Clone repository ---
-          mkdir -p /opt/idbi-platform
           git clone --branch ${GitBranch} ${GitRepoUrl} /opt/idbi-platform
           cd /opt/idbi-platform
 
-          # --- Python backend setup ---
           python3.12 -m venv /opt/idbi-platform/venv
           source /opt/idbi-platform/venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
 
-          # --- Frontend build ---
           cd /opt/idbi-platform/frontend
           npm install
           npm run build
 
-          # --- Nginx config ---
           cp /opt/idbi-platform/deploy/nginx.conf /etc/nginx/conf.d/idbi.conf
-          rm -f /etc/nginx/conf.d/default.conf 2>/dev/null
-          # disable default server block if present
-          sed -i 's/listen.*80.*default_server/# &/' /etc/nginx/nginx.conf 2>/dev/null
+          rm -f /etc/nginx/conf.d/default.conf
+          sed -i 's/listen.*80.*default_server/# &/' /etc/nginx/nginx.conf
           nginx -t && systemctl enable nginx && systemctl start nginx
 
-          # --- Backend systemd service ---
           cp /opt/idbi-platform/deploy/idbi-backend.service /etc/systemd/system/
           systemctl daemon-reload
           systemctl enable idbi-backend
 
-          # --- Frontend PM2 ---
           cd /opt/idbi-platform/frontend
           pm2 start /opt/idbi-platform/deploy/ecosystem.config.cjs
           pm2 save
           pm2 startup systemd -u root --hp /root
 
-          # --- Download data from S3 (if available) ---
           aws s3 sync s3://${DataBucket}/data/ /opt/idbi-platform/data/ --region ap-south-1 || true
 
-          # --- Start backend ---
           systemctl start idbi-backend
-
           echo "=== DEPLOYMENT COMPLETE ==="
 
-
   # ========================================================================
-  # Application Load Balancer
+  # ALB
   # ========================================================================
   ALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -340,9 +184,6 @@ Resources:
       Subnets:
         - !Ref PublicSubnetA
         - !Ref PublicSubnetB
-      Tags:
-        - Key: Name
-          Value: idbi-platform-alb
 
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -350,7 +191,7 @@ Resources:
       Name: idbi-platform-tg
       Port: 80
       Protocol: HTTP
-      VpcId: !Ref VPC
+      VpcId: !Ref VpcId
       TargetType: instance
       HealthCheckPath: /health
       HealthCheckIntervalSeconds: 30
@@ -371,7 +212,7 @@ Resources:
           TargetGroupArn: !Ref TargetGroup
 
   # ========================================================================
-  # CloudFront Distribution
+  # CloudFront
   # ========================================================================
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
@@ -395,26 +236,13 @@ Resources:
               OriginProtocolPolicy: http-only
         PriceClass: PriceClass_200
         HttpVersion: http2
-      Tags:
-        - Key: Name
-          Value: idbi-platform-cf
 
-# ========================================================================
-# Outputs
-# ========================================================================
 Outputs:
   CloudFrontURL:
-    Description: Public URL for the application
     Value: !Sub 'https://${CloudFrontDistribution.DomainName}'
-
   ALBDNSName:
-    Description: ALB DNS (internal — do not expose directly)
     Value: !GetAtt ALB.DNSName
-
   InstanceId:
-    Description: EC2 Instance ID (for SSM session)
     Value: !Ref EC2Instance
-
   DataBucketName:
-    Description: S3 bucket for uploading model artifacts
     Value: !Ref DataBucket
