@@ -1,35 +1,109 @@
 [
   {
-    "timestamp": "2026-07-09T02:15:00Z",
-    "agent": "risk_agent",
-    "customer_id": 2048,
-    "trigger": "default_probability_spike",
-    "scores": {"default_pd": 38.1},
+    "timestamp": "2026-07-09T08:00:48.317538+00:00",
+    "agent": "prospect_agent",
+    "customer_id": 1730,
+    "trigger": "high_propensity",
+    "scores": {
+      "propensity": 100.0,
+      "default_pd": 0.3
+    },
+    "response": null,
     "structured_output": {
-      "customer_id": 2048,
-      "assessment": "Customer shows rapid PD deterioration from 6% to 38% over 42 days. SHAP analysis indicates salary delay and cash advances as primary drivers, consistent with a job transition pattern rather than structural income loss.",
-      "default_probability": 38.1,
-      "stress_level": "action_required",
-      "root_cause": "Job transition — salary credit delayed 12 days, FD pre-closed for liquidity, cash advances to bridge gap",
-      "top_risk_factors": ["salary_delay_days", "cash_advance_count_30d", "sip_cancelled_recently"],
-      "is_temporary": true,
+      "customer_id": 1730,
+      "assessment": "Customer 1730 shows a very high propensity (100) for a personal loan, driven by wedding-related spending signals and strong discretionary spend. Default risk is negligible (0.3%) and EMI fits comfortably within 40% of his monthly surplus (\u20b9586). This makes him a high-quality, low\u2011risk prospect for a modest personal loan to fund wedding expenses.",
+      "propensity_confidence": "high",
+      "intent_signals": [
+        "wedding_cluster_score",
+        "high_discretionary_spend_ratio"
+      ],
+      "predicted_product": "Personal Loan",
+      "recommended_amount": 11000,
+      "estimated_emi": 234,
+      "monthly_surplus": 586,
+      "call_script": "Hello Mr.\u202f[First\u202fName], this is Rohit Sharma from IDBI Bank. I hope you\u2019re doing well. I noticed you\u2019ve been exploring wedding\u2011related services recently, and I wanted to let you know we have a special pre\u2011approved personal loan ready for you. Based on your steady monthly income of \u20b923,680 and a surplus of about \u20b9586, we can offer you a loan of \u20b911,000 at a competitive 10% p.a. rate, spread over 60\u202fmonths \u2013 that works out to an EMI of roughly \u20b9234, which is well within 40% of your surplus. This will give you the flexibility to cover wedding expenses without straining your cash flow. If you have any questions about repayment options or need a shorter tenure, I\u2019m happy to customize it for you. Shall we go ahead and finalize the paperwork today, or would you prefer a quick call later this week?",
       "recommended_actions": [
         {
-          "action_type": "alert_rm",
-          "label": "Alert RM (Urgent)",
-          "details": "Notify RM Ajay Kumar — customer likely in job transition. EMI due in 5 days, high bounce risk.",
-          "urgency": "critical"
-        },
-        {
-          "action_type": "initiate_text_outreach",
-          "label": "Send Support Message",
-          "details": "\"Need flexibility with your upcoming EMI? We're here to help. Your RM will reach out shortly.\"",
+          "action_type": "generate_loan_offer",
+          "label": "Generate Pre\u2011approved Personal Loan Offer",
+          "details": "Generate a pre\u2011approved Personal Loan for \u20b911,000 with 60\u2011month tenure at 10% annual interest (EMI \u2248 \u20b9234).",
           "urgency": "high"
         },
         {
-          "action_type": "recommend_moratorium",
-          "label": "Recommend 2-Month Moratorium",
-          "details": "Propose 2-month EMI pause to prevent bounce. Resume normal schedule after salary stabilizes.",
+          "action_type": "alert_rm",
+          "label": "Alert RM",
+          "details": "Alert RM Rohit Sharma to reach out to customer 1730 with the pre\u2011approved offer.",
+          "urgency": "high"
+        }
+      ],
+      "autonomy_tier": 1
+    },
+    "status": "completed"
+  },
+  {
+    "timestamp": "2026-07-09T08:00:48.317538+00:00",
+    "agent": "prospect_agent",
+    "customer_id": 2423,
+    "trigger": "high_propensity",
+    "scores": {
+      "propensity": 100.0,
+      "default_pd": 0.3
+    },
+    "response": null,
+    "structured_output": {
+      "customer_id": 2423,
+      "assessment": "Customer 2423 shows a perfect high-propensity signal for an auto loan (auto dealer transactions, discretionary spend) with a 100% propensity score and high confidence. Default risk is negligible (0.3%). Income is stable (\u20b919,847/month) but surplus is modest (\u20b9819), so a small, affordable loan of \u20b915,000 with EMI \u20b9308 fits comfortably within the 40% surplus rule.",
+      "propensity_confidence": "high",
+      "intent_signals": [
+        "auto_dealer_txn_count_30d",
+        "discretionary_spend_ratio",
+        "insurance_comparison_flag"
+      ],
+      "predicted_product": "Auto Loan",
+      "recommended_amount": 15000,
+      "estimated_emi": 308,
+      "monthly_surplus": 819,
+      "call_script": "Hello [Customer Name],\n\nThis is Rajesh Kumar from IDBI Bank. I hope you\u2019re doing well. I noticed you\u2019ve recently visited an auto dealer and have been exploring car\u2011related services \u2013 that\u2019s exciting! Based on your strong banking relationship with us and your stable monthly income of \u20b919,847, we have a pre\u2011approved Auto Loan of \u20b915,000 ready for you.\n\nKey points:\n1. **Affordable EMI** \u2013 At an attractive 8.5% interest over 60 months, your EMI will be just about \u20b9308, which is well under 40% of your monthly surplus (\u20b9819).\n2. **Quick disbursal** \u2013 Since the loan is pre\u2011approved, we can credit the amount to your account within 24\u202fhours of your confirmation.\n3. **Flexibility** \u2013 If you ever need to adjust the tenure or make a partial pre\u2011payment, we\u2019ll work with you at no extra cost.\n\nI understand you might be cautious about the repayment amount. Rest assured, the EMI is designed to fit comfortably within your cash\u2011flow, leaving ample room for your other expenses.\n\nWould you like me to go ahead and process this loan for you today? If you need any clarification, I\u2019m here to help. We can also schedule a quick follow\u2011up call tomorrow to finalize the paperwork.\n\nThank you for choosing IDBI Bank \u2013 we\u2019re delighted to support your next vehicle purchase!",
+      "recommended_actions": [
+        {
+          "action_type": "alert_rm",
+          "label": "Alert RM",
+          "details": "Notify RM Rajesh Kumar: Pre\u2011approved Auto Loan of INR 15,000 for customer 2423, EMI INR 308/month, tenure 60 months at 8.5% p.a. Please review and call the customer within 24\u202fhrs.",
+          "urgency": "high"
+        }
+      ],
+      "autonomy_tier": 1
+    },
+    "status": "completed"
+  },
+  {
+    "timestamp": "2026-07-09T08:00:48.317538+00:00",
+    "agent": "prospect_agent",
+    "customer_id": 3076,
+    "trigger": "high_propensity",
+    "scores": {
+      "propensity": 99.9,
+      "default_pd": 0.3
+    },
+    "response": null,
+    "structured_output": {
+      "customer_id": 3076,
+      "assessment": "Customer 3076 exhibits an exceptionally high home\u2011loan intent (property\u2011portal activity) and an excellent credit profile (default probability 0.3%). With a monthly surplus of \u20b91,323, a modest loan of ~\u20b960,000 results in an EMI of about \u20b9529, well within the 40% surplus rule.",
+      "propensity_confidence": "high",
+      "intent_signals": [
+        "property_portal_txn_count_45d",
+        "discretionary_spend_ratio"
+      ],
+      "predicted_product": "Home Loan",
+      "recommended_amount": 60000,
+      "estimated_emi": 529,
+      "monthly_surplus": 1323,
+      "call_script": "Good morning/afternoon, Sir/Madam. This is Rohit Sharma, your Relationship Manager at IDBI Bank. I see you\u2019ve been with us for a while and enjoy a steady monthly income of \u20b914,659 with a healthy surplus of \u20b91,323.\n\nBased on your recent activity on property\u2011portal websites, we\u2019ve pre\u2011approved a Home Loan that can help you move forward with your property plans. We can offer you up to \u20b960,000 at an attractive 8.5% p.a. rate over 20 years, which translates to an EMI of roughly \u20b9529 \u2013 comfortably below 40% of your surplus.\n\nKey points:\n\u2022 Your credit health is excellent (default risk 0.3%).\n\u2022 The EMI fits easily within your monthly surplus, leaving ample room for other expenses.\n\u2022 The loan is flexible \u2013 you can adjust tenure or make pre\u2011payments without penalties.\n\nIf you have any concerns about the repayment schedule, we can discuss longer tenures or partial pre\u2011payment options to further reduce the EMI.\n\nI\u2019ll send the detailed loan offer to your registered email/WhatsApp right after this call. Could we schedule a brief follow\u2011up tomorrow at 3\u202fpm to walk you through the paperwork and answer any questions?",
+      "recommended_actions": [
+        {
+          "action_type": "generate_loan_offer",
+          "label": "Generate Home Loan Offer",
+          "details": "Generate a pre\u2011approved Home Loan offer of INR 60,000 for 240 months at 8.5% annual interest (EMI \u2248 \u20b9529).",
           "urgency": "high"
         }
       ],
@@ -38,144 +112,302 @@
     "status": "completed"
   },
   {
-    "timestamp": "2026-07-09T02:14:30Z",
-    "agent": "prospect_agent",
-    "customer_id": 3421,
-    "trigger": "high_propensity",
-    "scores": {"propensity": 87.3, "default_pd": 4.2},
-    "structured_output": {
-      "customer_id": 3421,
-      "assessment": "Strong auto loan prospect — 3 car dealership payments in 14 days, monthly surplus comfortably supports ₹18K EMI, very low default risk at 4.2%.",
-      "propensity_confidence": "high",
-      "intent_signals": ["auto_dealer_txn_count_30d (3 transactions)", "new_merchant_velocity high", "discretionary_spend_ratio stable"],
-      "predicted_product": "Auto Loan",
-      "recommended_amount": 1000000,
-      "estimated_emi": 18200,
-      "monthly_surplus": 42000,
-      "recommended_actions": [
-        {
-          "action_type": "generate_loan_offer",
-          "label": "Generate Pre-Approved Offer",
-          "details": "Auto Loan: ₹10,00,000 at 8.5% p.a., 60 months, EMI ₹18,200",
-          "urgency": "high"
-        },
-        {
-          "action_type": "send_push_notification",
-          "label": "Send Customer Nudge",
-          "details": "\"Looking at a new car? We have a pre-approved auto loan ready for you — ₹10L at 8.5%. Tap to explore.\"",
-          "urgency": "medium"
-        },
-        {
-          "action_type": "alert_rm",
-          "label": "Brief RM for Follow-up",
-          "details": "Add to RM Priya's call list. Follow up in 48 hours if no response to notification.",
-          "urgency": "medium"
-        }
-      ],
-      "autonomy_tier": 1
-    },
-    "status": "completed"
-  },
-  {
-    "timestamp": "2026-07-09T02:14:00Z",
-    "agent": "health_agent",
-    "customer_id": 2926,
-    "trigger": "msme_health_assessment",
-    "scores": {},
-    "structured_output": {
-      "customer_id": 2926,
-      "assessment": "Textile MSME with strong cash flow and zero bounces. Seasonal revenue dip in June-July is a manageable concern. Overall healthy profile suitable for working capital lending.",
-      "composite_score": 76.2,
-      "strengths": ["Zero bounced payments (debt management: 92)", "Strong monthly surplus of ₹90K", "GST filed on time 11/12 months", "Stable 5-employee workforce"],
-      "concerns": ["Revenue seasonal — dips 30% in June-July", "Moderate growth trajectory (65/100)", "One missed GST filing (August)"],
-      "lending_recommendation": "approve",
-      "suggested_amount": 800000,
-      "special_conditions": "Structured EMI: ₹18K normal months, ₹12K in June-July to match seasonal cash flow",
-      "recommended_actions": [
-        {
-          "action_type": "flag_for_underwriter",
-          "label": "Send to Underwriter",
-          "details": "Health Card + recommendation: Approve ₹8L with structured EMI. Composite score 76/100.",
-          "urgency": "medium"
-        },
-        {
-          "action_type": "generate_loan_offer",
-          "label": "Prepare Offer Letter",
-          "details": "Working Capital: ₹8,00,000 at 10.5% p.a., 36 months, structured EMI ₹18K/₹12K",
-          "urgency": "low"
-        }
-      ],
-      "autonomy_tier": 3
-    },
-    "status": "completed"
-  },
-  {
-    "timestamp": "2026-07-09T02:13:30Z",
-    "agent": "engagement_agent",
-    "customer_id": 4501,
-    "trigger": "high_propensity",
-    "scores": {"propensity": 78.5, "default_pd": 6.1},
-    "structured_output": {
-      "customer_id": 4501,
-      "assessment": "32-year-old professional showing home loan intent — property portal payments detected. Monthly surplus ₹65K supports significant EMI. No existing home loan.",
-      "trigger_reason": "Property search behavior detected (99acres, MagicBricks payments)",
-      "message_content": "Planning your dream home? You're pre-qualified for a home loan up to ₹45L at competitive rates. Tap to explore your options — zero processing fee this month.",
-      "message_language": "en",
-      "channel": "push",
-      "send_timing": "7:00 PM today (customer typically active evenings)",
-      "recommended_actions": [
-        {
-          "action_type": "send_push_notification",
-          "label": "Send Push Notification",
-          "details": "Personalized home loan nudge — English, push notification at 7 PM",
-          "urgency": "medium"
-        },
-        {
-          "action_type": "alert_rm",
-          "label": "Brief RM",
-          "details": "Customer exploring property. Schedule follow-up call in 3 days if no response.",
-          "urgency": "low"
-        },
-        {
-          "action_type": "schedule_followup",
-          "label": "Schedule Follow-up",
-          "details": "If no response in 72 hours, send SMS reminder with branch visit invite",
-          "urgency": "low"
-        }
-      ],
-      "autonomy_tier": 1
-    },
-    "status": "completed"
-  },
-  {
-    "timestamp": "2026-07-09T02:13:00Z",
+    "timestamp": "2026-07-09T08:00:48.317538+00:00",
     "agent": "risk_agent",
-    "customer_id": 1856,
+    "customer_id": 6473,
     "trigger": "default_probability_spike",
-    "scores": {"default_pd": 52.7},
+    "scores": {
+      "default_pd": 99.5
+    },
+    "response": null,
     "structured_output": {
-      "customer_id": 1856,
-      "assessment": "Severe deterioration — PD at 52.7% with multiple EMI bounces over 6 months. This is structural income stress, not temporary. Requires immediate risk committee review.",
-      "default_probability": 52.7,
+      "customer_id": 6473,
+      "assessment": "Customer 6473 exhibits an extremely high default probability (99.5%) driven by frequent overdrafts, repeated low balances, and consistent EMI delays. Cashflow adequacy and external compliance scores are critically low, indicating systemic financial stress.",
+      "default_probability": 99.5,
       "stress_level": "escalate",
-      "root_cause": "Structural income loss — salary reduced, multiple bounces, balance consistently below minimum",
-      "top_risk_factors": ["emi_bounce_count_6m", "balance_below_min_count", "salary_delay_days"],
+      "root_cause": "over-leverage and cashflow insufficiency",
+      "top_risk_factors": [
+        "overdraft_frequency",
+        "balance_below_min_count",
+        "emi_delay_avg_days"
+      ],
       "is_temporary": false,
       "recommended_actions": [
         {
           "action_type": "escalate_to_risk_committee",
           "label": "Escalate to Risk Committee",
-          "details": "PD 52.7%, structural stress. Requires urgent restructuring or recall decision.",
-          "urgency": "critical"
-        },
-        {
-          "action_type": "alert_rm",
-          "label": "Alert RM (Critical)",
-          "details": "Account requires immediate restructuring discussion. 6 bounces in 6 months.",
+          "details": "Escalate account 6473 to the Risk Committee with PD 99.5% and summary of overdraft, balance breaches, and EMI delays indicating structural distress.",
           "urgency": "critical"
         }
       ],
       "autonomy_tier": 3
+    },
+    "status": "completed"
+  },
+  {
+    "timestamp": "2026-07-09T08:00:48.317538+00:00",
+    "agent": "risk_agent",
+    "customer_id": 6034,
+    "trigger": "default_probability_spike",
+    "scores": {
+      "default_pd": 99.7
+    },
+    "response": null,
+    "structured_output": {
+      "customer_id": 6034,
+      "assessment": "Customer 6034 exhibits an extremely high default probability of 99.7%, driven by frequent overdrafts, repeated low balances, and delayed EMI payments, indicating severe cashflow stress and over\u2011leverage.",
+      "default_probability": 99.7,
+      "stress_level": "escalate",
+      "root_cause": "over\u2011leverage and cashflow insufficiency",
+      "top_risk_factors": [
+        "overdraft_frequency",
+        "balance_below_min_count",
+        "emi_delay_avg_days"
+      ],
+      "is_temporary": false,
+      "recommended_actions": [
+        {
+          "action_type": "escalate_to_risk_committee",
+          "label": "Escalate to Risk Committee",
+          "details": "PD=99.7%; loan status B; overdraft and balance issues indicate imminent default. Escalate to risk committee for urgent review and possible restructuring or write\u2011off decision.",
+          "urgency": "critical"
+        }
+      ],
+      "autonomy_tier": 3
+    },
+    "status": "completed"
+  },
+  {
+    "timestamp": "2026-07-09T08:00:48.317538+00:00",
+    "agent": "risk_agent",
+    "customer_id": 5442,
+    "trigger": "default_probability_spike",
+    "scores": {
+      "default_pd": 99.5
+    },
+    "response": null,
+    "structured_output": {
+      "customer_id": 5442,
+      "assessment": "Customer 5442 exhibits an extremely high default probability of 99.5%, driven by frequent overdrafts, repeated low balances, and delayed EMI payments. The health scores show severe cashflow inadequacy and poor debt management, indicating structural financial distress.",
+      "default_probability": 99.5,
+      "stress_level": "action_required",
+      "root_cause": "over-leverage and cashflow insufficiency",
+      "top_risk_factors": [
+        "overdraft_frequency",
+        "balance_below_min_count",
+        "emi_delay_avg_days"
+      ],
+      "is_temporary": false,
+      "recommended_actions": [
+        {
+          "action_type": "escalate_to_risk_committee",
+          "label": "Escalate to Risk Committee",
+          "details": "Escalate account 5442 to the risk committee with PD 99.5% and summary of overdraft and cashflow issues.",
+          "urgency": "critical"
+        },
+        {
+          "action_type": "alert_rm",
+          "label": "Alert Relationship Manager",
+          "details": "Alert the assigned Relationship Manager (RM) about the critical risk status of account 5442 and request immediate outreach.",
+          "urgency": "critical"
+        }
+      ],
+      "autonomy_tier": 3
+    },
+    "status": "completed"
+  },
+  {
+    "timestamp": "2026-07-09T08:00:48.317538+00:00",
+    "agent": "health_agent",
+    "customer_id": 2926,
+    "trigger": "msme_health_assessment",
+    "response": null,
+    "structured_output": {
+      "customer_id": 2926,
+      "assessment": "Customer 2926 shows strong financial discipline, excellent debt management, robust growth, and healthy cash flow, resulting in a high composite health score of 79.7. However, income stability is weak (34.7) due to irregular cash inflows and balance volatility, which introduces some risk.",
+      "composite_score": 79.7,
+      "strengths": [
+        "Spending Discipline (92.3) \u2013 low discretionary spend and consistent transaction patterns",
+        "Debt Management (100) \u2013 no EMI bounces, minimal delays",
+        "Growth Trajectory (100) \u2013 strong income growth and positive revenue trends",
+        "Cash Flow Adequacy (78.8) \u2013 high monthly surplus and diversified business transactions",
+        "External Compliance (72.5) \u2013 regular GST filings and healthy balance"
+      ],
+      "concerns": [
+        "Income Stability (34.7) \u2013 irregular income streams and high balance volatility reduce predictability"
+      ],
+      "lending_recommendation": "approve",
+      "suggested_amount": 500000,
+      "special_conditions": "2\u2011month grace period; EMI reduced by 20% during June\u2011July (monsoon low\u2011income period); review income regularity after 3 months",
+      "recommended_actions": [
+        {
+          "action_type": "generate_loan_offer",
+          "label": "Generate Loan Offer",
+          "details": "Offer a loan of INR 500,000 with a 12\u2011month tenure, EMI structured with a 2\u2011month grace period and lower EMIs during historically low\u2011income months (e.g., monsoon season). Flag the income\u2011stability concern for underwriter review.",
+          "urgency": "medium"
+        },
+        {
+          "action_type": "alert_rm",
+          "label": "Alert RM",
+          "details": "Notify the Relationship Manager to monitor income regularity and balance volatility for the next 3 months.",
+          "urgency": "low"
+        }
+      ],
+      "autonomy_tier": 3
+    },
+    "status": "completed"
+  },
+  {
+    "timestamp": "2026-07-09T08:00:48.317538+00:00",
+    "agent": "health_agent",
+    "customer_id": 3834,
+    "trigger": "msme_health_assessment",
+    "response": null,
+    "structured_output": {
+      "customer_id": 3834,
+      "assessment": "Customer 3834 shows strong spending discipline, solid cash flow adequacy, and good external compliance, but suffers from very low income stability, moderate debt management issues, and a weak growth trajectory. The composite health score of 59.5 places the customer in the Review zone.",
+      "composite_score": 59.5,
+      "strengths": [
+        "Spending Discipline (92) \u2013 disciplined spending and low discretionary spend ratio.",
+        "Cash Flow Adequacy (78.4) \u2013 high monthly surplus and diverse business transactions.",
+        "External Compliance (72.5) \u2013 regular GST filings and strong account balances."
+      ],
+      "concerns": [
+        "Income Stability (22.7) \u2013 irregular income, low growth rate, high balance volatility.",
+        "Debt Management (51.3) \u2013 frequent EMI bounces and delayed payments.",
+        "Growth Trajectory (40.2) \u2013 minimal income growth, borderline low."
+      ],
+      "lending_recommendation": "review",
+      "suggested_amount": 200000,
+      "special_conditions": "Flexible EMI schedule with reduced payments in June-July (monsoon season) and requirement of collateral/guarantor due to income volatility.",
+      "recommended_actions": [
+        {
+          "action_type": "flag_for_underwriter",
+          "label": "Send to Underwriter",
+          "details": "Recommend reviewing the loan request. Concerns: irregular and volatile income (Income Stability 22.7), high EMI bounce count (Debt Management 51.3), and stagnant growth (Growth Trajectory 40.2). Suggest a modest loan amount of INR 200,000 with a 12\u2011month tenure and flexible EMI structure (lower EMIs during low\u2011income months, e.g., June\u2011July). Require additional collateral or guarantor due to income instability.",
+          "urgency": "high"
+        }
+      ],
+      "autonomy_tier": 3
+    },
+    "status": "completed"
+  },
+  {
+    "timestamp": "2026-07-09T08:00:48.317538+00:00",
+    "agent": "health_agent",
+    "customer_id": 5891,
+    "trigger": "msme_health_assessment",
+    "response": null,
+    "structured_output": {
+      "customer_id": 5891,
+      "assessment": "The customer exhibits strong financial health with a composite score of 66.8. Income stability, spending discipline, cash\u2011flow adequacy and growth trajectory are all above 60, indicating robust earnings and disciplined spending. However, debt\u2011management shows moderate risk due to a high count of recent EMI bounces and delayed payments, and external compliance is slightly below the strong threshold because of occasional utility\u2011payment delays.",
+      "composite_score": 66.8,
+      "strengths": [
+        "Income Stability (61.4)",
+        "Spending Discipline (91.1)",
+        "Cash\u2011Flow Adequacy (62.3)",
+        "Growth Trajectory (77.5)"
+      ],
+      "concerns": [
+        "Debt Management (score 50.8) \u2013 high EMI bounce count and average delay indicate repayment risk.",
+        "External Compliance (score 57.9) \u2013 utility payment timeliness below optimal."
+      ],
+      "lending_recommendation": "approve",
+      "suggested_amount": 500000,
+      "special_conditions": "Standard EMI schedule over 5 years (~12,000\u202fINR per month). Monitor EMI bounce behavior; consider a shorter tenure or higher EMI if repayment performance improves.",
+      "recommended_actions": [
+        {
+          "action_type": "flag_for_underwriter",
+          "label": "Flag for Underwriter",
+          "details": "Flag for underwriter: Recommendation=Approve; Composite Health Score=66.8; Concerns=Debt Management (EMI bounce count high, average delay 3.6 days), External Compliance (utility payments on\u2011time pct low).",
+          "urgency": "medium"
+        }
+      ],
+      "autonomy_tier": 3
+    },
+    "status": "completed"
+  },
+  {
+    "timestamp": "2026-07-09T08:00:48.317538+00:00",
+    "agent": "engagement_agent",
+    "customer_id": 1730,
+    "trigger": "high_propensity",
+    "response": null,
+    "structured_output": {
+      "customer_id": 1730,
+      "assessment": "Customer 1730 shows a strong propensity for a Personal Loan, driven by wedding\u2011related activity and solid income stability. While cashflow surplus is modest, debt\u2011management is excellent, indicating they could comfortably handle a low\u2011EMI loan for upcoming wedding expenses.",
+      "trigger_reason": "high_propensity (wedding planning)",
+      "message_content": "Hi! \ud83c\udf89 We noticed you\u2019re planning something special. To make your wedding celebrations even smoother, IDBI offers a pre\u2011approved personal loan with flexible EMIs and low rates. It takes just 2 minutes to check your eligibility. Reply \u2018YES\u2019 to explore the offer.",
+      "message_language": "en",
+      "channel": "whatsapp",
+      "send_timing": "7 PM today",
+      "recommended_actions": [
+        {
+          "action_type": "generate_loan_offer",
+          "label": "Create Personal Loan Offer",
+          "details": "Generate a pre\u2011approved Personal Loan offer up to \u20b92,00,000 with flexible repayment options and share the link in the WhatsApp message.",
+          "urgency": "high"
+        }
+      ],
+      "autonomy_tier": 2
+    },
+    "status": "completed"
+  },
+  {
+    "timestamp": "2026-07-09T08:00:48.317538+00:00",
+    "agent": "engagement_agent",
+    "customer_id": 2423,
+    "trigger": "high_propensity",
+    "response": null,
+    "structured_output": {
+      "customer_id": 2423,
+      "assessment": "Customer 2423 shows strong recent interest in automobile purchases (high auto dealer transaction count) and has a perfect debt\u2011management score, indicating readiness for a new loan. A tailored auto\u2011loan offer can help them secure financing quickly and conveniently.",
+      "trigger_reason": "high_propensity",
+      "message_content": "Hi! We noticed you\u2019ve been exploring cars lately. IDBI can offer you a quick, low\u2011interest auto loan with flexible EMIs. Tap to view your personalized pre\u2011approved offer.",
+      "message_language": "en",
+      "channel": "push",
+      "send_timing": "7 PM today",
+      "recommended_actions": [
+        {
+          "action_type": "generate_loan_offer",
+          "label": "View Auto Loan Offer",
+          "details": "Auto Loan up to \u20b95\u202flakh with 10% lower than market interest, tenure 12\u201160 months, instant pre\u2011approval.",
+          "urgency": "medium"
+        }
+      ],
+      "autonomy_tier": 2
+    },
+    "status": "completed"
+  },
+  {
+    "timestamp": "2026-07-09T08:00:48.317538+00:00",
+    "agent": "engagement_agent",
+    "customer_id": 3076,
+    "trigger": "high_propensity",
+    "response": null,
+    "structured_output": {
+      "customer_id": 3076,
+      "assessment": "Customer 3076 shows a very high propensity (99.9) for a Home Loan, driven by recent property portal activity and strong income stability. While cashflow adequacy is modest, debt management is excellent, indicating readiness for a mortgage offering.",
+      "trigger_reason": "high_propensity",
+      "message_content": "Hi! Based on your recent property searches, you may qualify for a home loan with attractive rates. Tap to see a quick, no\u2011obligation eligibility check.",
+      "message_language": "en",
+      "channel": "push",
+      "send_timing": "7 PM today",
+      "recommended_actions": [
+        {
+          "action_type": "generate_loan_offer",
+          "label": "Generate Home Loan Offer",
+          "details": "Create a personalized pre\u2011approved Home Loan offer up to INR 30\u202flakhs with low documentation, referencing the customer's property portal activity.",
+          "urgency": "high"
+        },
+        {
+          "action_type": "alert_rm",
+          "label": "Alert RM",
+          "details": "Notify the assigned Relationship Manager (RM) to review the customer's profile and be ready for a follow\u2011up call if the customer shows interest.",
+          "urgency": "medium"
+        }
+      ],
+      "autonomy_tier": 2
     },
     "status": "completed"
   }

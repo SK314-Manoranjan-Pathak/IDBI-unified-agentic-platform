@@ -1,0 +1,24 @@
+[Unit]
+Description=IDBI Agentic Platform — FastAPI ML Backend
+After=network.target
+
+[Service]
+Type=exec
+User=root
+WorkingDirectory=/opt/idbi-platform
+ExecStart=/opt/idbi-platform/venv/bin/gunicorn api.main:app \
+    --workers 4 \
+    --worker-class uvicorn.workers.UvicornWorker \
+    --bind 127.0.0.1:8000 \
+    --timeout 120 \
+    --access-logfile /var/log/idbi-backend-access.log \
+    --error-logfile /var/log/idbi-backend-error.log
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+Environment=BEDROCK_MODEL_ID=openai.gpt-oss-120b-1:0
+Environment=AWS_REGION=ap-south-1
+Environment=API_BASE_URL=http://localhost:8000
+
+[Install]
+WantedBy=multi-user.target

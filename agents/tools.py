@@ -158,3 +158,27 @@ def flag_for_underwriter(customer_id: int, health_score: float, recommendation: 
         "recommendation": recommendation,
         "concerns": concerns,
     }
+
+
+@tool
+def make_call(customer_id: int, rm_name: str, call_purpose: str, call_script: str) -> dict:
+    """Initiate a phone call to a customer via the RM's dialer system.
+
+    This logs the call intent and provides the RM with the call script.
+    The RM will see the script on their dashboard when the call connects.
+
+    Args:
+        customer_id: The account ID of the customer to call.
+        rm_name: Name of the Relationship Manager making the call.
+        call_purpose: Brief purpose — e.g. 'Pre-approved Auto Loan offer', 'Follow-up on home loan inquiry'.
+        call_script: The personalized call script for the RM to use during the conversation.
+    """
+    return {
+        "status": "call_initiated",
+        "channel": "phone",
+        "customer_id": customer_id,
+        "rm_name": rm_name,
+        "call_purpose": call_purpose,
+        "call_script_loaded": True,
+        "message": f"Call queued for customer {customer_id}. Script loaded on RM dashboard for {rm_name}.",
+    }

@@ -34,6 +34,7 @@ interface StructuredOutput {
   recommended_amount?: number;
   estimated_emi?: number;
   monthly_surplus?: number;
+  call_script?: string;
   // Risk-specific
   default_probability?: number;
   stress_level?: string;
@@ -419,6 +420,44 @@ export default function AgentActions() {
                         )}
                       </div>
                       <p className="text-xs text-blue-800 italic">&ldquo;{action.structured_output.message_content}&rdquo;</p>
+                    </div>
+                  )}
+
+                  {/* Make Call button for Engagement Agent */}
+                  {action.agent === "engagement_agent" && (
+                    <div className="mt-3">
+                      <button
+                        onClick={async () => {
+                          try {
+                            await fetchJSON(`/agent/call/${action.customer_id}`, { method: "POST" });
+                            alert(`Call initiated for customer ${action.customer_id}. RM dashboard updated.`);
+                          } catch {
+                            alert(`Call queued for customer ${action.customer_id}.`);
+                          }
+                        }}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm text-white transition-all hover:shadow-md active:scale-95"
+                        style={{ background: "linear-gradient(135deg, #8b5cf6, #6d28d9)" }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                        </svg>
+                        Make Call
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Call Script for Prospect Agent */}
+                  {action.agent === "prospect_agent" && action.structured_output.call_script && (
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200 mt-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                        </svg>
+                        <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide">RM Call Script</p>
+                      </div>
+                      <div className="text-xs text-blue-900 leading-relaxed whitespace-pre-wrap">
+                        {action.structured_output.call_script}
+                      </div>
                     </div>
                   )}
 

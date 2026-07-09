@@ -119,6 +119,12 @@ def startup():
     _DATA = _load()
 
 
+@app.get("/health")
+def health_check():
+    """Health check endpoint for ALB target group."""
+    return {"status": "ok", "models_loaded": len(_DATA) > 0}
+
+
 # --------------------------------------------------------------------------- #
 # Helpers
 # --------------------------------------------------------------------------- #
@@ -404,3 +410,34 @@ def get_routing_info():
     feat = load_scores()
     routes = route_customers(feat)
     return get_routing_summary(routes)
+
+
+@app.post("/api/agent/call/{customer_id}")
+def initiate_call(customer_id: int):
+    """Initiate a call to a customer — logs the call and returns call metadata."""
+    idx = _get_idx(customer_id)
+    feat = _DATA["feat"]
+    row = feat.iloc[idx]
+
+    prop_score = round(float(_DATA["propensity_scores"][idx]) * 100, 1)
+    pd_score = round(float(_DATA["default_scores"][idx]) * 100, 1)
+    health_scores = {dim: round(float(preds[idx]), 1)
+                     for dim, preds in _DATA["health_preds"].items()}
+    composite_health = round(np.mean(list(health_scores.values())), 1)
+
+    # Build context for the call
+    monthly_income = round(float(row.get("monthly_income_avg", 0)))
+    monthly_surplus = round(float(row.get("monthly_surplus_avg", 0)))
+
+    return {
+        "status": "call_initiated",
+        "customer_id": customer_id,
+        "call_metadata": {
+            "propensity_score": prop_score,
+            "default_probability": pd_score,
+            "composite_health": composite_health,
+            "monthly_income": monthly_income,
+            "monthly_surplus": monthly_surplus,
+        },
+        "message": f"Call initiated for customer {customer_id}. RM dashboard updated.",
+    }

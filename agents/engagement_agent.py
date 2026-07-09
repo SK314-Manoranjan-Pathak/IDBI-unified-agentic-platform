@@ -15,6 +15,7 @@ from .tools import (
     get_health_card,
     send_customer_notification,
     send_rm_alert,
+    make_call,
 )
 
 SYSTEM_PROMPT = """You are the Engagement Agent for IDBI Bank's Agentic Intelligence Platform.
@@ -78,6 +79,7 @@ def create_engagement_agent() -> Agent:
             get_health_card,
             send_customer_notification,
             send_rm_alert,
+            make_call,
         ],
     )
 

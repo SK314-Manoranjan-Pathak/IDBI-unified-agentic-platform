@@ -16,6 +16,7 @@ class RecommendedAction(BaseModel):
         "generate_loan_offer",
         "initiate_call_outreach",
         "initiate_text_outreach",
+        "initiate_phone_call",
         "send_push_notification",
         "alert_rm",
         "escalate_to_risk_committee",
@@ -40,6 +41,7 @@ class ProspectAgentOutput(BaseModel):
     recommended_amount: int = Field(description="Suggested loan amount in INR")
     estimated_emi: int = Field(description="Estimated monthly EMI in INR")
     monthly_surplus: int = Field(description="Customer's monthly surplus in INR")
+    call_script: str = Field(description="Personalized RM call script tailored to this customer's profile, intent signals, and financial context. Include: opening line, value proposition, key talking points, objection handling, and closing with next steps.")
     recommended_actions: list[RecommendedAction] = Field(description="Actions for human to approve")
     autonomy_tier: Literal[1, 2, 3] = Field(description="1=autonomous, 2=act+notify, 3=human decides")
 
