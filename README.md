@@ -15,6 +15,7 @@ A unified ML scoring platform that reads customer transaction behavior and produ
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
 - [Pipeline Execution](#pipeline-execution)
+- [Multi-Agent System](#multi-agent-system)
 - [API Reference](#api-reference)
 - [Frontend Dashboard](#frontend-dashboard)
 - [Model Performance](#model-performance)
@@ -89,13 +90,19 @@ Every lending decision — who to lend to, how healthy they are, whether they'll
                                    ▼
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │  Phase 5: api/main.py (FastAPI)                                              │
-│  8 endpoints · Pre-loaded models · <10ms response · CORS enabled             │
+│  10 endpoints · Pre-loaded models · <10ms response · CORS enabled            │
 └──────────────────────────────────┬───────────────────────────────────────────┘
                                    ▼
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│  Phase 6: frontend/ (Next.js + Recharts)                                     │
-│  5 views: Portfolio Overview · Customer Lookup · Prospect Assist ·            │
-│  Health Card · Early Warning System                                          │
+│  Phase 6: Multi-Agent System (Strands SDK + AWS Bedrock)                     │
+│  Router → Prospect Agent · Risk Agent · Health Agent · Engagement Agent      │
+│  Score-based routing · Structured output · Autonomy tiers · Call scripts     │
+└──────────────────────────────────┬───────────────────────────────────────────┘
+                                   ▼
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  Phase 7: frontend/ (Next.js + Recharts)                                     │
+│  6 views: Portfolio Overview · Customer Lookup · Prospect Assist ·            │
+│  Health Card · Early Warning System · Agent Command Center                   │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -148,7 +155,21 @@ IDBI-unified-agentic-platform/
 │       └── plots/                   #   Global importance bar charts (PNG)
 │
 ├── api/
-│   └── main.py                      # FastAPI scoring service (8 endpoints)
+│   └── main.py                      # FastAPI scoring service (10 endpoints)
+│
+├── agents/                          # Multi-Agent System (Strands SDK + Bedrock)
+│   ├── __init__.py                  #   Package init
+│   ├── config.py                    #   Bedrock model config, thresholds, autonomy tiers
+│   ├── router.py                    #   Score-based customer → agent routing
+│   ├── schemas.py                   #   Pydantic structured output models
+│   ├── tools.py                     #   Shared agent tools (API calls, notifications, call)
+│   ├── prospect_agent.py            #   Qualifies leads, generates call scripts, creates offers
+│   ├── risk_agent.py                #   Detects stress, recommends intervention
+│   ├── health_agent.py              #   Assesses NTC/MSME creditworthiness
+│   ├── engagement_agent.py          #   Crafts personalized outreach + make call
+│   ├── run_batch.py                 #   Batch runner — routes & processes flagged customers
+│   └── actions/
+│       └── actions_latest.json      #   Latest agent action log (consumed by frontend)
 │
 ├── frontend/                        # Next.js 16 + React 19 + Recharts dashboard
 │   ├── src/
@@ -156,12 +177,13 @@ IDBI-unified-agentic-platform/
 │   │   │   ├── layout.tsx           #   Root layout (dark theme, metadata)
 │   │   │   ├── page.tsx             #   Main page with tabbed navigation
 │   │   │   └── globals.css          #   Global styles + CSS variables
-│   │   ├── components/
+│   ├── components/
 │   │   │   ├── PortfolioOverview.tsx #   KPIs, risk pie chart, top prospects
 │   │   │   ├── CustomerLookup.tsx   #   360° view, radar + SHAP charts
 │   │   │   ├── ProspectList.tsx     #   Ranked prospects with threshold slider
 │   │   │   ├── HealthCard.tsx       #   6-dimension radar + breakdown
-│   │   │   └── EarlyWarning.tsx     #   Flagged accounts + SHAP drill-down
+│   │   │   ├── EarlyWarning.tsx     #   Flagged accounts + SHAP drill-down
+│   │   │   └── AgentActions.tsx     #   Agent Command Center + call scripts + make call
 │   │   └── lib/
 │   │       └── api.ts               #   API client + TypeScript interfaces
 │   ├── next.config.ts               #   Rewrites /api/* → FastAPI backend
@@ -188,6 +210,8 @@ IDBI-unified-agentic-platform/
 | Explainability | SHAP | 0.50.0 |
 | Data Processing | Pandas, NumPy | 2.3.3, 2.3.5 |
 | ML Utilities | scikit-learn | 1.7.2 |
+| Agent Framework | Strands Agents SDK | 1.28.0 |
+| LLM Backend | AWS Bedrock | — |
 | API Backend | FastAPI + Uvicorn | 0.109.0, 0.41.0 |
 | Frontend | Next.js + React | 16.2, 19.1 |
 | Visualization | Recharts | 2.15.3 |
@@ -203,6 +227,7 @@ IDBI-unified-agentic-platform/
 
 - Python 3.10+
 - Node.js 18+
+- AWS account with Bedrock access (for agents — optional for ML pipeline + dashboard)
 - Raw datasets placed in `Master_data/` (see [feature-engineering-README.md](feature-engineering-README.md) for download links)
 
 ### Installation
@@ -220,6 +245,29 @@ cd frontend
 npm install
 cd ..
 ```
+
+### AWS Configuration (Required for Agents)
+
+The multi-agent system uses AWS Bedrock for LLM inference. Configure SSO:
+
+```bash
+# Configure AWS SSO
+aws configure sso
+
+# Login to your SSO session
+aws sso login --profile <your-profile-name>
+
+# Set the profile for the current terminal session
+# Windows:
+set AWS_PROFILE=<your-profile-name>
+# Linux/Mac:
+export AWS_PROFILE=<your-profile-name>
+
+# Verify
+aws sts get-caller-identity --profile <your-profile-name>
+```
+
+Ensure the Bedrock model (`openai.gpt-oss-120b-1:0`) is enabled in your AWS account's Bedrock console for the `ap-south-1` region.
 
 ---
 
@@ -275,6 +323,100 @@ npm run dev
 
 Access the dashboard at **http://localhost:3000**
 
+### Run the Agents (Terminal 3)
+
+Requires AWS SSO to be configured and logged in.
+
+```bash
+# Set AWS profile (if not already done)
+set AWS_PROFILE=<your-profile-name>
+
+# Run agents on flagged customers (3 per agent for dev)
+python -m agents.run_batch --limit 3
+
+# Process more customers for a fuller demo
+python -m agents.run_batch --limit 10
+
+# Dry run — just routes customers, no LLM calls (free, tests routing logic)
+python -m agents.run_batch --dry-run
+```
+
+Agent results are written to `agents/actions/actions_latest.json` and automatically displayed in the **Agent Command Center** tab in the frontend.
+
+---
+
+## Multi-Agent System
+
+The platform includes a fully implemented multi-agent system built with **Strands Agents SDK** on **AWS Bedrock**. The agents operate in a detect → reason → act loop, powered by ML scores and SHAP explainability.
+
+### Agent Architecture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                     SCORE-BASED ROUTER                        │
+│  Loads feature matrix → applies thresholds → routes to agents│
+└─────┬──────────┬──────────────┬──────────────┬───────────────┘
+      ▼          ▼              ▼              ▼
+┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────┐
+│ PROSPECT │ │   RISK   │ │  HEALTH  │ │  ENGAGEMENT  │
+│  AGENT   │ │  AGENT   │ │  AGENT   │ │    AGENT     │
+├──────────┤ ├──────────┤ ├──────────┤ ├──────────────┤
+│Qualify   │ │Detect    │ │Assess    │ │Craft comms   │
+│leads     │ │stress    │ │NTC/MSME  │ │Choose channel│
+│Size offer│ │Root cause│ │6-dim card│ │Time delivery │
+│Call script│ │Intervene │ │Lend/deny │ │Make call     │
+└──────────┘ └──────────┘ └──────────┘ └──────────────┘
+```
+
+### Agents Overview
+
+| Agent | Trigger | Actions | Autonomy |
+|-------|---------|---------|----------|
+| **Prospect Agent** | Propensity > 70, PD < 15% | Generate pre-approved offer, create personalized call script, alert RM | Tier 2 (Act + Notify) |
+| **Risk Agent** | PD > 30% on existing loan | Escalate to risk committee, recommend moratorium/restructure | Tier 3 (Human Decides) |
+| **Health Agent** | MSME/NTC customer flagged | 6-dimension assessment, approve/review/decline, flag for underwriter | Tier 3 (Human Decides) |
+| **Engagement Agent** | High propensity, life events | Personalized notifications, channel selection, make call | Tier 1 (Autonomous) |
+
+### Autonomy Tiers
+
+| Tier | Behavior | Example |
+|------|----------|---------|
+| 1 — Autonomous | Agent acts without approval | Send push notification, schedule SMS |
+| 2 — Act + Notify | Agent acts, notifies human | Generate loan offer + alert RM |
+| 3 — Human Decides | Agent recommends, human approves | Escalate to risk committee, credit decision |
+
+### Personalized Call Scripts (Prospect Agent)
+
+The Prospect Agent generates **customer-specific RM call scripts** based on:
+- Detected intent signals (auto dealer visits, property portal activity, wedding spending)
+- Monthly surplus and income stability
+- Recommended product and pre-approved amount
+- SHAP-driven talking points
+
+Each script includes: opening → value proposition → key talking points → objection handling → closing with next steps.
+
+### Make Call (Engagement Agent)
+
+The Engagement Agent includes a **Make Call** action that:
+- Initiates a phone call via the RM dialer system
+- Loads the personalized script on the RM dashboard
+- Logs the call intent with full customer context
+
+### Tools Available to Agents
+
+| Tool | Purpose |
+|------|---------|
+| `get_customer_profile` | Full profile + all ML scores |
+| `get_propensity_details` | Propensity + SHAP factors + predicted product |
+| `get_health_card` | 6-dimension health assessment |
+| `get_default_risk` | PD + stress level + risk factors |
+| `generate_loan_offer` | Create pre-approved offer with EMI calculation |
+| `send_rm_alert` | Alert relationship manager |
+| `send_customer_notification` | Push/SMS/WhatsApp/email notification |
+| `make_call` | Initiate phone call via RM dialer |
+| `escalate_to_risk_committee` | Escalate high-risk accounts |
+| `flag_for_underwriter` | Send to underwriter queue |
+
 ---
 
 ## API Reference
@@ -291,6 +433,9 @@ Base URL: `http://localhost:8000`
 | GET | `/api/prospects` | Ranked prospects (propensity > threshold, PD < 15%) |
 | GET | `/api/early-warning` | Loan accounts with elevated default risk |
 | POST | `/api/agent/analyze/{id}` | Agent-style reasoning summary with recommended action |
+| GET | `/api/agent/actions` | Fetch logged agent actions from latest batch run |
+| GET | `/api/agent/routing` | Current routing summary — customers per agent |
+| POST | `/api/agent/call/{id}` | Initiate a call to customer via RM dialer |
 
 ### Query Parameters
 
@@ -323,7 +468,7 @@ Base URL: `http://localhost:8000`
 
 ## Frontend Dashboard
 
-The dashboard provides 5 modules accessible via a sidebar:
+The dashboard provides 6 modules accessible via a sidebar:
 
 ### 1. Portfolio Overview
 - KPI cards: total customers, low/high risk counts, hot prospects
@@ -354,6 +499,16 @@ The dashboard provides 5 modules accessible via a sidebar:
 - Flagged accounts table (sortable by risk)
 - SHAP drill-down on click
 - Intervention matrix (Level 1/2/3)
+
+### 6. Agent Command Center
+- Agent status cards (Prospect, Risk, Health, Engagement) with action counts
+- Filterable activity feed with structured agent outputs
+- Prospect Agent: personalized RM call scripts with customer-specific talking points
+- Engagement Agent: "Make Call" button to initiate calls via RM dialer
+- Risk Agent: root cause analysis, escalation actions
+- Health Agent: strengths/concerns breakdown, lending recommendation
+- Autonomy tier indicators (Autonomous / Act+Notify / Human Decides)
+- Recommended action buttons per agent output
 
 ---
 
@@ -414,17 +569,23 @@ See [ML_PIPELINE_DOCUMENTATION.md](ML_PIPELINE_DOCUMENTATION.md) for detailed fe
 3. **Pre-computed predictions** — All predictions are computed at API startup and served from memory for <10ms response times.
 4. **SHAP for explainability** — Every prediction has per-feature attribution. Critical for RBI compliance (no black-box decisions).
 5. **Shared feature layer** — One feature matrix feeds all three models. Reduces engineering overhead and ensures consistency.
+6. **Strands Agents SDK** — Chose Strands over LangChain/CrewAI for native AWS Bedrock integration, structured output, and tool-use patterns.
+7. **Score-based routing** — Agents are triggered by ML thresholds, not user requests. The system is proactive, not reactive.
+8. **Autonomy tiers** — Three-tier system ensures high-risk decisions always involve a human while low-risk actions execute autonomously.
+9. **Personalized call scripts** — Generated per-customer using actual ML signals and SHAP factors, not templates. Each script references specific financial data.
 
 ---
 
 ## Future Enhancements
 
-- **Strands Agents SDK** — Multi-agent system (Supervisor, Prospect, Health, Risk, Engagement agents) on AWS Bedrock AgentCore
 - **Transaction Transformer** — Raw sequence modeling for temporal pattern detection
 - **Account Aggregator integration** — Real-time AA data pull via Sahamati
 - **Multilingual engagement** — Sarvam AI for 11 Indian languages
 - **AgentCore Memory** — Semantic + episodic customer memory for personalized interactions
 - **Real-time scoring** — EventBridge triggers for transaction-level re-scoring
+- **AWS Bedrock AgentCore deployment** — Production-grade agent hosting with guardrails
+- **Voice AI integration** — Real-time call transcription + live script prompting for RMs
+- **WhatsApp Business API** — Direct customer engagement via WhatsApp with rich media
 
 ---
 
