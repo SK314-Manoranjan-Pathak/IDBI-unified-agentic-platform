@@ -236,7 +236,6 @@ Resources:
   DataBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub 'idbi-platform-data-${AWS::AccountId}'
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -266,8 +265,6 @@ Resources:
           Ebs:
             VolumeSize: 30
             VolumeType: gp3
-            Iops: 3000
-            Throughput: 125
       Tags:
         - Key: Name
           Value: idbi-platform-ec2
@@ -321,7 +318,7 @@ Resources:
           pm2 startup systemd -u root --hp /root
 
           # --- Download data from S3 (if available) ---
-          aws s3 sync s3://idbi-platform-data-${AWS::AccountId}/data/ /opt/idbi-platform/data/ --region ap-south-1 || true
+          aws s3 sync s3://${DataBucket}/data/ /opt/idbi-platform/data/ --region ap-south-1 || true
 
           # --- Start backend ---
           systemctl start idbi-backend
@@ -389,7 +386,6 @@ Resources:
           CachedMethods: [GET, HEAD]
           ForwardedValues:
             QueryString: true
-            Headers: ["*"]
           Compress: true
         Origins:
           - Id: alb-origin
