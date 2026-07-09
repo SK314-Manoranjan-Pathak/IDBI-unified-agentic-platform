@@ -387,17 +387,10 @@ Resources:
           ViewerProtocolPolicy: redirect-to-https
           AllowedMethods: [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]
           CachedMethods: [GET, HEAD]
-          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad  # CachingDisabled
-          OriginRequestPolicyId: 216adef6-5c7f-47e4-b989-5492eafa07d3  # AllViewer
+          ForwardedValues:
+            QueryString: true
+            Headers: ["*"]
           Compress: true
-        CacheBehaviors:
-          - PathPattern: /_next/static/*
-            TargetOriginId: alb-origin
-            ViewerProtocolPolicy: redirect-to-https
-            AllowedMethods: [GET, HEAD]
-            CachedMethods: [GET, HEAD]
-            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
-            Compress: true
         Origins:
           - Id: alb-origin
             DomainName: !GetAtt ALB.DNSName
@@ -405,7 +398,7 @@ Resources:
               HTTPPort: 80
               OriginProtocolPolicy: http-only
         PriceClass: PriceClass_200
-        HttpVersion: http2and3
+        HttpVersion: http2
       Tags:
         - Key: Name
           Value: idbi-platform-cf
