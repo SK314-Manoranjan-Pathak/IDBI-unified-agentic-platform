@@ -15,16 +15,16 @@ Parameters:
     Type: String
     Default: main
     Description: Git branch to deploy
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+    Description: Latest Amazon Linux 2023 x86_64 AMI (auto-resolved)
+
   InstanceType:
     Type: String
     Default: t3.xlarge
     Description: EC2 instance type (4 vCPU, 16 GB RAM recommended)
     AllowedValues: [t3.large, t3.xlarge, m6i.large, m6i.xlarge, c6i.xlarge]
-
-Mappings:
-  RegionAMI:
-    ap-south-1:
-      AMI: ami-0f58b397bc5c1f2e8  # Amazon Linux 2023 arm64 (update if needed)
 
 Resources:
 
@@ -209,7 +209,6 @@ Resources:
   EC2Role:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: idbi-ec2-role
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -256,7 +255,7 @@ Resources:
     DependsOn: PrivateRoute
     Properties:
       InstanceType: !Ref InstanceType
-      ImageId: !FindInMap [RegionAMI, !Ref 'AWS::Region', AMI]
+      ImageId: !Ref LatestAmiId
       KeyName: !Ref KeyPairName
       SubnetId: !Ref PrivateSubnet
       SecurityGroupIds:
