@@ -366,3 +366,41 @@ def agent_analyze(customer_id: int):
         "recommended_action": recommended_action,
         "urgency": urgency,
     }
+
+
+
+# --------------------------------------------------------------------------- #
+# Agent Actions Endpoint
+# --------------------------------------------------------------------------- #
+@app.get("/api/agent/actions")
+def get_agent_actions(agent_filter: str = Query("all")):
+    """Fetch logged agent actions from the latest batch run."""
+    actions_file = ROOT / "agents" / "actions" / "actions_latest.json"
+    if not actions_file.exists():
+        return {"actions": [], "summary": {}}
+
+    with open(actions_file) as f:
+        actions = json.load(f)
+
+    if agent_filter != "all":
+        actions = [a for a in actions if a.get("agent") == agent_filter]
+
+    # Build summary
+    summary = {}
+    for a in actions:
+        agent = a.get("agent", "unknown")
+        if agent not in summary:
+            summary[agent] = {"count": 0, "status": "active"}
+        summary[agent]["count"] += 1
+
+    return {"actions": actions, "summary": summary}
+
+
+@app.get("/api/agent/routing")
+def get_routing_info():
+    """Get current routing summary — how many customers each agent would process."""
+    from agents.router import load_scores, route_customers, get_routing_summary
+
+    feat = load_scores()
+    routes = route_customers(feat)
+    return get_routing_summary(routes)

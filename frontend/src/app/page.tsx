@@ -6,6 +6,7 @@ import CustomerLookup from "@/components/CustomerLookup";
 import ProspectList from "@/components/ProspectList";
 import HealthCard from "@/components/HealthCard";
 import EarlyWarning from "@/components/EarlyWarning";
+import AgentActions from "@/components/AgentActions";
 
 const TABS = [
   { id: "portfolio", label: "Portfolio Overview", icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>` },
@@ -13,6 +14,7 @@ const TABS = [
   { id: "prospects", label: "Prospect Assist", icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>` },
   { id: "health", label: "Health Card", icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>` },
   { id: "warning", label: "Early Warning", icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>` },
+  { id: "agents", label: "Agent Actions", icon: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 2 2 3 2 6H8a2 2 0 0 0-2 2v2h12v-2a2 2 0 0 0-2-2h-2c0-3 2-4 2-6a4 4 0 0 0-4-4Z"/><path d="M9 18v1a3 3 0 0 0 6 0v-1"/></svg>` },
 ];
 
 export default function Home() {
@@ -83,6 +85,7 @@ export default function Home() {
         {activeTab === "prospects" && <ProspectList />}
         {activeTab === "health" && <HealthCard />}
         {activeTab === "warning" && <EarlyWarning />}
+        {activeTab === "agents" && <AgentActions />}
       </main>
     </div>
   );

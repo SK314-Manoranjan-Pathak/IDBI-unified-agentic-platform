@@ -22,6 +22,11 @@ fastapi==0.109.0
 uvicorn==0.41.0
 python-multipart==0.0.22
 
+# --- Agent Framework ---
+strands-agents>=0.1.0
+strands-agents-tools>=0.1.0
+httpx>=0.27.0
+
 # --- Notes ---
 # huggingface_hub was upgraded to 1.22.0 during dataset download, which conflicts
 # with transformers<1.0. Only relevant if a Transaction Transformer is added later;
