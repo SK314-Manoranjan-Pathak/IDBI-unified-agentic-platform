@@ -26,11 +26,11 @@ Parameters:
     Description: Existing VPC ID
   PublicSubnetA:
     Type: AWS::EC2::Subnet::Id
-    Default: subnet-08e95ab6b2ef7c89d
+    Default: subnet-0271cd800d2e4ab6b
     Description: Public subnet AZ-a (for ALB + EC2)
   PublicSubnetB:
     Type: AWS::EC2::Subnet::Id
-    Default: subnet-03629ef4cfcfcaa44
+    Default: subnet-0bb706995839d483e
     Description: Public subnet AZ-b (for ALB)
 
 Resources:
@@ -114,10 +114,13 @@ Resources:
       InstanceType: !Ref InstanceType
       ImageId: !Ref LatestAmiId
       KeyName: !Ref KeyPairName
-      SubnetId: !Ref PublicSubnetA
-      SecurityGroupIds:
-        - !Ref EC2SecurityGroup
       IamInstanceProfile: !Ref EC2InstanceProfile
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeviceIndex: "0"
+          SubnetId: !Ref PublicSubnetA
+          GroupSet:
+            - !Ref EC2SecurityGroup
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
