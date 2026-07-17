@@ -60,6 +60,9 @@ interface AgentSummary {
   [agent: string]: { count: number; status: string };
 }
 
+const PROTOTYPE_NOTICE =
+  "This feature is included to demonstrate the art of the possible. It is not functional in this prototype.";
+
 const AGENT_META: Record<string, { label: string; color: string; icon: string }> = {
   prospect_agent: {
     label: "Prospect Agent",
@@ -425,7 +428,7 @@ export default function AgentActions() {
 
                   {/* Make Call button for Engagement Agent */}
                   {action.agent === "engagement_agent" && (
-                    <div className="mt-3 relative inline-block group w-fit">
+                    <div className="mt-3">
                       <button
                         onClick={async () => {
                           try {
@@ -435,6 +438,7 @@ export default function AgentActions() {
                             alert(`Call queued for customer ${action.customer_id}.`);
                           }
                         }}
+                        title={PROTOTYPE_NOTICE}
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm text-white transition-all hover:shadow-md active:scale-95"
                         style={{ background: "linear-gradient(135deg, #8b5cf6, #6d28d9)" }}
                       >
@@ -443,19 +447,8 @@ export default function AgentActions() {
                         </svg>
                         Make Call
                       </button>
-                  
-                      {/* Tooltip */}
-                      <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2
-                                       opacity-0 group-hover:opacity-100 transition-opacity duration-150
-                                       whitespace-nowrap text-[11px] px-2.5 py-1.5 rounded-md
-                                       bg-gray-900 text-white shadow-lg z-10">
-                        Not functional — shows available scope for work
-                        <div className="absolute left-1/2 -translate-x-1/2 top-full
-                                         border-4 border-transparent border-t-gray-900" />
-                      </div>
                     </div>
                   )}
-                  
 
                   {/* Call Script for Prospect Agent */}
                   {action.agent === "prospect_agent" && action.structured_output.call_script && (
@@ -511,7 +504,7 @@ export default function AgentActions() {
                                 ? "bg-[var(--primary-blue)] text-white border-[var(--primary-blue)] hover:opacity-90"
                                 : "bg-white text-[var(--text)] border-[var(--card-border)] hover:border-[var(--primary-blue)] hover:text-[var(--primary-blue)]"
                             }`}
-                            title={ra.details}
+                            title={PROTOTYPE_NOTICE}
                           >
                             {ra.label}
                           </button>
