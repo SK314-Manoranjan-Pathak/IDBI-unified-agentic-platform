@@ -461,7 +461,7 @@ export default function AgentActions() {
                                 ? "bg-[var(--primary-blue)] text-white border-[var(--primary-blue)] hover:opacity-90"
                                 : "bg-white text-[var(--text)] border-[var(--card-border)] hover:border-[var(--primary-blue)] hover:text-[var(--primary-blue)]"
                             }`}
-                            title={ra.details}
+                            title={`Demo: feature scope — ${ra.label}. ${ra.details}`}
                           >
                             {ra.label}
                           </button>
