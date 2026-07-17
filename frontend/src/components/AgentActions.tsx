@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { fetchJSON } from "@/lib/api";
 
 interface AgentAction {
@@ -27,7 +27,6 @@ interface StructuredOutput {
   assessment: string;
   recommended_actions: RecommendedAction[];
   autonomy_tier: number;
-  // Prospect-specific
   propensity_confidence?: string;
   intent_signals?: string[];
   predicted_product?: string;
@@ -35,20 +34,17 @@ interface StructuredOutput {
   estimated_emi?: number;
   monthly_surplus?: number;
   call_script?: string;
-  // Risk-specific
   default_probability?: number;
   stress_level?: string;
   root_cause?: string;
   top_risk_factors?: string[];
   is_temporary?: boolean;
-  // Health-specific
   composite_score?: number;
   strengths?: string[];
   concerns?: string[];
   lending_recommendation?: string;
   suggested_amount?: number;
   special_conditions?: string;
-  // Engagement-specific
   trigger_reason?: string;
   message_content?: string;
   message_language?: string;
@@ -62,6 +58,51 @@ interface AgentSummary {
 
 const PROTOTYPE_NOTICE =
   "This feature is included to demonstrate the art of the possible. It is not functional in this prototype.";
+
+/**
+ * Wraps any element with a tooltip that follows the cursor horizontally,
+ * always rendered ABOVE the trigger, clamped so it never runs off either
+ * edge of the viewport. Stays visible for as long as the cursor is over
+ * the trigger and is not dismissed by clicking it.
+ */
+function PrototypeTooltip({ children }: { children: React.ReactNode }) {
+  const wrapperRef = useRef<HTMLSpanElement>(null);
+  const tooltipRef = useRef<HTMLSpanElement>(null);
+  const [visible, setVisible] = useState(false);
+  const [left, setLeft] = useState(0);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLSpanElement>) => {
+    if (!wrapperRef.current || !tooltipRef.current) return;
+    const wrapperRect = wrapperRef.current.getBoundingClientRect();
+    const tooltipWidth = tooltipRef.current.offsetWidth;
+    const cursorX = e.clientX - wrapperRect.left;
+
+    const minLeft = -wrapperRect.left + 8;
+    const maxLeft = window.innerWidth - wrapperRect.left - tooltipWidth - 8;
+    setLeft(Math.max(minLeft, Math.min(cursorX, maxLeft)));
+  };
+
+  return (
+    <span
+      ref={wrapperRef}
+      className="relative inline-block align-middle"
+      onMouseEnter={() => setVisible(true)}
+      onMouseLeave={() => setVisible(false)}
+      onMouseMove={handleMouseMove}
+    >
+      {children}
+      <span
+        ref={tooltipRef}
+        className="pointer-events-none absolute bottom-full mb-2
+                   whitespace-nowrap text-xs px-3 py-2 rounded-md border
+                   bg-white text-[var(--text)] border-[var(--card-border)] shadow-lg z-20 transition-opacity duration-100"
+        style={{ left, opacity: visible ? 1 : 0 }}
+      >
+        {PROTOTYPE_NOTICE}
+      </span>
+    </span>
+  );
+}
 
 const AGENT_META: Record<string, { label: string; color: string; icon: string }> = {
   prospect_agent: {
@@ -93,25 +134,19 @@ const URGENCY_STYLES: Record<string, string> = {
   low: "bg-gray-50 border-gray-200 text-gray-600",
 };
 
-/**
- * Parse agent response text (may contain markdown-like formatting)
- * into presentable React elements.
- */
 function formatAgentResponse(raw: string): React.ReactNode {
-  // Clean up markdown artifacts
   const lines = raw
-    .replace(/\*\*/g, "")       // remove bold markers
-    .replace(/<br\s*\/?>/g, "\n") // convert <br> to newlines
-    .replace(/\|[-]+/g, "")     // remove table separators
-    .replace(/\|\s*\|/g, "")    // remove empty table cells
+    .replace(/\*\*/g, "")
+    .replace(/<br\s*\/?>/g, "\n")
+    .replace(/\|[-]+/g, "")
+    .replace(/\|\s*\|/g, "")
     .split("\n")
     .map((l) => l.trim())
-    .filter((l) => l.length > 0 && !l.match(/^\|[\s-]*\|?$/)); // remove empty table rows
+    .filter((l) => l.length > 0 && !l.match(/^\|[\s-]*\|?$/));
 
   const elements: React.ReactNode[] = [];
 
   lines.forEach((line, i) => {
-    // Section headers (lines ending with : or starting with caps + containing key terms)
     if (
       line.match(/^(Assessment Summary|Action Taken|Top SHAP|Recommendation|Stress Level|Current PD|Intervention|Reasoning)/i) ||
       line.match(/^[A-Z][A-Za-z\s]+:$/)
@@ -122,7 +157,6 @@ function formatAgentResponse(raw: string): React.ReactNode {
         </p>
       );
     }
-    // Numbered items or bullet points
     else if (line.match(/^\d+\.\s/) || line.match(/^[-•]\s/)) {
       elements.push(
         <div key={i} className="flex gap-2 ml-2 mb-1">
@@ -131,7 +165,6 @@ function formatAgentResponse(raw: string): React.ReactNode {
         </div>
       );
     }
-    // Key-value pairs (lines with : separator)
     else if (line.includes(":") && line.indexOf(":") < 30 && !line.startsWith("http")) {
       const [key, ...rest] = line.split(":");
       const value = rest.join(":").trim();
@@ -146,7 +179,6 @@ function formatAgentResponse(raw: string): React.ReactNode {
         elements.push(<p key={i} className="mb-1">{line}</p>);
       }
     }
-    // Table-like rows (contain | separators)
     else if (line.includes("|") && line.split("|").length >= 3) {
       const cells = line.split("|").map((c) => c.trim()).filter(Boolean);
       elements.push(
@@ -159,7 +191,6 @@ function formatAgentResponse(raw: string): React.ReactNode {
         </div>
       );
     }
-    // Regular text
     else {
       elements.push(<p key={i} className="mb-1">{line}</p>);
     }
@@ -182,7 +213,6 @@ export default function AgentActions() {
     });
   }, [activeFilter]);
 
-  // Load full summary on mount
   useEffect(() => {
     fetchJSON<{ actions: AgentAction[]; summary: AgentSummary }>("/agent/actions?agent_filter=all").then((d) => {
       setSummary(d.summary);
@@ -200,7 +230,6 @@ export default function AgentActions() {
         </p>
       </div>
 
-      {/* Agent cards row */}
       <div className="grid grid-cols-4 gap-4 mb-8">
         {allAgents.map((agentKey) => {
           const meta = AGENT_META[agentKey];
@@ -246,7 +275,6 @@ export default function AgentActions() {
         })}
       </div>
 
-      {/* Filter indicator */}
       <div className="flex items-center gap-3 mb-4">
         <p className="text-sm font-medium text-[var(--text-secondary)]">
           Activity Feed
@@ -269,7 +297,6 @@ export default function AgentActions() {
         )}
       </div>
 
-      {/* Activity feed */}
       <div className="space-y-4 max-h-[520px] overflow-auto">
         {actions.length === 0 && (
           <div className="card text-center py-12">
@@ -292,7 +319,6 @@ export default function AgentActions() {
 
           return (
             <div key={idx} className="card">
-              {/* Header */}
               <div className="flex items-center gap-3 mb-3">
                 <div
                   className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
@@ -317,7 +343,6 @@ export default function AgentActions() {
                 </span>
               </div>
 
-              {/* Scores */}
               {action.scores && (
                 <div className="flex gap-4 mb-3 text-xs">
                   {Object.entries(action.scores).map(([k, v]) => (
@@ -330,15 +355,12 @@ export default function AgentActions() {
                 </div>
               )}
 
-              {/* Structured Output */}
               {action.structured_output && (
                 <div className="space-y-3">
-                  {/* Assessment */}
                   <p className="text-sm text-[var(--text)] leading-relaxed">
                     {action.structured_output.assessment}
                   </p>
 
-                  {/* Key metrics row */}
                   <div className="flex flex-wrap gap-3">
                     {action.structured_output.predicted_product && (
                       <span className="text-xs px-2 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200">
@@ -400,7 +422,6 @@ export default function AgentActions() {
                     )}
                   </div>
 
-                  {/* Root cause / signals */}
                   {action.structured_output.root_cause && (
                     <div className="bg-[#f8fafc] rounded-lg p-3 border border-[var(--card-border)]">
                       <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] mb-1">Root Cause</p>
@@ -408,7 +429,6 @@ export default function AgentActions() {
                     </div>
                   )}
 
-                  {/* Message preview for engagement */}
                   {action.structured_output.message_content && (
                     <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
                       <div className="flex items-center gap-2 mb-1">
@@ -426,31 +446,30 @@ export default function AgentActions() {
                     </div>
                   )}
 
-                  {/* Make Call button for Engagement Agent */}
                   {action.agent === "engagement_agent" && (
                     <div className="mt-3">
-                      <button
-                        onClick={async () => {
-                          try {
-                            await fetchJSON(`/agent/call/${action.customer_id}`, { method: "POST" });
-                            alert(`Call initiated for customer ${action.customer_id}. RM dashboard updated.`);
-                          } catch {
-                            alert(`Call queued for customer ${action.customer_id}.`);
-                          }
-                        }}
-                        title={PROTOTYPE_NOTICE}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm text-white transition-all hover:shadow-md active:scale-95"
-                        style={{ background: "linear-gradient(135deg, #8b5cf6, #6d28d9)" }}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                        </svg>
-                        Make Call
-                      </button>
+                      <PrototypeTooltip>
+                        <button
+                          onClick={async () => {
+                            try {
+                              await fetchJSON(`/agent/call/${action.customer_id}`, { method: "POST" });
+                              alert(`Call initiated for customer ${action.customer_id}. RM dashboard updated.`);
+                            } catch {
+                              alert(`Call queued for customer ${action.customer_id}.`);
+                            }
+                          }}
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm text-white transition-all hover:shadow-md active:scale-95"
+                          style={{ background: "linear-gradient(135deg, #8b5cf6, #6d28d9)" }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                          </svg>
+                          Make Call
+                        </button>
+                      </PrototypeTooltip>
                     </div>
                   )}
 
-                  {/* Call Script for Prospect Agent */}
                   {action.agent === "prospect_agent" && action.structured_output.call_script && (
                     <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200 mt-3">
                       <div className="flex items-center gap-2 mb-2">
@@ -465,7 +484,6 @@ export default function AgentActions() {
                     </div>
                   )}
 
-                  {/* Strengths & Concerns (Health) */}
                   {action.structured_output.strengths && action.structured_output.strengths.length > 0 && (
                     <div className="grid grid-cols-2 gap-3">
                       <div>
@@ -489,35 +507,32 @@ export default function AgentActions() {
                     </div>
                   )}
 
-                  {/* Action Buttons */}
                   {action.structured_output.recommended_actions && action.structured_output.recommended_actions.length > 0 && (
                     <div className="border-t border-[var(--card-border)] pt-3 mt-3">
                       <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] mb-2">Recommended Actions</p>
                       <div className="flex flex-wrap gap-2">
                         {action.structured_output.recommended_actions.map((ra, i) => (
-                          <button
-                            key={i}
-                            className={`text-xs px-3 py-1.5 rounded-md font-medium border transition-all hover:shadow-sm ${
-                              ra.urgency === "critical"
-                                ? "bg-red-600 text-white border-red-600 hover:bg-red-700"
-                                : ra.urgency === "high"
-                                ? "bg-[var(--primary-blue)] text-white border-[var(--primary-blue)] hover:opacity-90"
-                                : "bg-white text-[var(--text)] border-[var(--card-border)] hover:border-[var(--primary-blue)] hover:text-[var(--primary-blue)]"
-                            }`}
-                            title={PROTOTYPE_NOTICE}
-                          >
-                            {ra.label}
-                          </button>
+                          <PrototypeTooltip key={i}>
+                            <button
+                              className={`text-xs px-3 py-1.5 rounded-md font-medium border transition-all hover:shadow-sm ${
+                                ra.urgency === "critical"
+                                  ? "bg-red-600 text-white border-red-600 hover:bg-red-700"
+                                  : ra.urgency === "high"
+                                  ? "bg-[var(--primary-blue)] text-white border-[var(--primary-blue)] hover:opacity-90"
+                                  : "bg-white text-[var(--text)] border-[var(--card-border)] hover:border-[var(--primary-blue)] hover:text-[var(--primary-blue)]"
+                              }`}
+                            >
+                              {ra.label}
+                            </button>
+                          </PrototypeTooltip>
                         ))}
                       </div>
-                      {/* Show details of first action */}
                       <p className="text-[10px] text-[var(--text-muted)] mt-2 italic">
                         {action.structured_output.recommended_actions[0]?.details}
                       </p>
                     </div>
                   )}
 
-                  {/* Autonomy tier */}
                   <div className="flex items-center gap-2 mt-2">
                     <span className="text-[10px] text-[var(--text-muted)]">
                       Tier {action.structured_output.autonomy_tier}:
@@ -529,7 +544,6 @@ export default function AgentActions() {
                 </div>
               )}
 
-              {/* Fallback: raw response (for old format) */}
               {!action.structured_output && action.response && (
                 <div className="bg-[#f8fafc] rounded-lg p-4 border border-[var(--card-border)]">
                   <div className="text-xs text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap agent-response">
@@ -538,14 +552,12 @@ export default function AgentActions() {
                 </div>
               )}
 
-              {/* Error */}
               {action.error && (
                 <div className="bg-red-50 rounded-lg p-3 border border-red-200">
                   <p className="text-xs text-red-600">{action.error}</p>
                 </div>
               )}
 
-              {/* Status badge */}
               <div className="mt-3 flex items-center gap-2">
                 <span className={`w-1.5 h-1.5 rounded-full ${action.status === "completed" ? "bg-green-500" : "bg-red-500"}`} />
                 <span className="text-[10px] text-[var(--text-muted)] uppercase">{action.status}</span>
