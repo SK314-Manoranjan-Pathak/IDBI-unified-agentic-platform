@@ -1,0 +1,31 @@
+Hi, we're Team ShellKode and this is FinPulse — a Unified Agentic Intelligence Platform for banking.
+
+The problem. Banks today struggle with three challenges. First, identifying which customers actually want a loan — before they walk into a branch. Second, assessing creditworthiness for new customers who have zero traditional documents — no CIBIL, no ITR. Third, detecting borrower deterioration early enough to prevent NPA. Current systems are reactive, siloed, and opaque. FinPulse solves all three with one unified approach.
+
+Our core insight — every lending decision is answered by the same signal: how people actually move money. One shared data layer powers all three predictions.
+
+The dataset. We selected the Berka financial dataset — over one million real banking transactions across thousands of accounts. We enriched it with Home Credit bureau data for default patterns and AgamiAI digital bank statements for Indian context.
+
+Critically, we Indianized the data. We converted currencies to INR, mapped transactions to Indian payment modes — UPI, NEFT, IMPS — assigned Indian merchant categories, and injected realistic behavioural patterns like auto dealer visits, GST filings, and EPFO contributions. This ensures our models learn patterns representative of Indian banking customers.
+
+Feature engineering. We built 51 behavioural features across 6 groups. Cash flow features capture income stability and surplus trends. Behavioural features track merchant diversity and spending patterns. Intent signals detect specific activities like auto dealer payments or property portal visits — these directly predict loan desire. Stress indicators identify EMI delays, overdraft frequency, and balance breaches. External features cover GST compliance and revenue trends for MSMEs. Home Credit features add bureau-level DPD enrichment.
+
+These features matter because they capture how customers behave — not just what they declare on forms.
+
+Model development. We chose XGBoost for three reasons. First, it dominates on structured tabular data with small-to-medium datasets. Second, it provides exact SHAP values — critical for explainability and RBI compliance. Third, it trains fast and serves predictions in under ten milliseconds.
+
+We trained three model heads on the shared feature layer. Propensity classifier — who wants a loan. Health score regressors — six dimension financial assessment. Default classifier — who's deteriorating. All validated with 5-fold cross validation achieving near-perfect AUC scores.
+
+The intelligence layer. These models generate three signals for every customer. A Loan Prospect Score identifies ready buyers and matches them to the right product. A Financial Health Score assesses creditworthiness across six dimensions — even for customers with zero documents. An Early Warning Score continuously monitors existing borrowers and flags behavioural deterioration weeks to months before default.
+
+These scores feed directly into four autonomous AI agents built on Strands SDK with AWS Bedrock. A Prospect Agent that qualifies leads and generates personalized call scripts. A Risk Agent that recommends intervention strategies. A Health Agent that makes lending decisions for undocumented customers. An Engagement Agent that crafts outreach and initiates calls.
+
+All of this intelligence comes together in a single unified platform. Let's see the result.
+
+The FinPulse portal. Portfolio Overview gives a complete view of all accounts — risk distribution, top prospects, key metrics. Customer Lookup provides a 360 degree view with SHAP explanations for every score. Prospect Assist ranks loan-ready customers with product predictions. Health Card visualizes six-dimension assessments for MSME customers. Early Warning flags deteriorating borrowers with drill-down into risk drivers. And the Agent Command Center shows all four agents operating — with personalized call scripts, make call functionality, and autonomy tiers ensuring humans stay in the loop for high-stakes decisions.
+
+Every prediction on this platform is explainable and every action is traceable.
+
+Business impact. Prospects identified weeks before they approach the bank — targeting thirty percent conversion improvement. Continuous monitoring provides early warning to prevent NPA. Financial inclusion for MSMEs with no traditional documents. Full RBI compliance through SHAP explainability. And RM productivity multiplied through AI-generated scripts and one-click outreach.
+
+One platform. One feature layer. Three problem statements solved. Four autonomous agents. That's FinPulse by ShellKode. Thank you.
